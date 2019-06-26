@@ -63,3 +63,5 @@ kafka.producer:type=kafka-metrics-count,client-id=moody-test_client-StreamThread
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)
 - [Issue 400: does the client automatically publish jmx mertices (heap size memory, thread number)?](https://github.com/prometheus/client_java/issues/400)
 - [Blog post: JMX monitoring + Java custom metrics.](https://sysdig.com/blog/jmx-monitoring-custom-metrics/)
+- [Kafka metrics reporter](https://github.com/apache/kafka/blob/2.0.0/clients/src/main/java/org/apache/kafka/common/metrics/MetricsReporter.java)
+- [IMO - Good example how to make custom collector](https://github.com/joyent/manta-monitor/blob/master/src/main/java/com/joyent/manta/monitor/CustomPrometheusCollector.java)
