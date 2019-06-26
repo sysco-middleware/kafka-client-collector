@@ -1,0 +1,12 @@
+.DS_Store
+# editor files
+*.swp
+*.iml
+.idea
+
+# compilation objects
+target/
+.project
+.settings/
+.classpath
+dependency-reduced-pom.xml
