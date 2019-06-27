@@ -9,9 +9,7 @@ import org.apache.kafka.common.metrics.JmxReporter;
 
 import javax.management.*;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -20,6 +18,7 @@ public class KafkaClientsJmxCollector extends Collector {
 
     private MBeanServer mBeanServer;
     private Set<MetricName> metricNames;
+    private Map<String, Boolean> kafkaDomainFound;
 
     public KafkaClientsJmxCollector(Set<MetricName> metricNames) {
         this(metricNames, ManagementFactory.getPlatformMBeanServer());
@@ -28,6 +27,19 @@ public class KafkaClientsJmxCollector extends Collector {
     public KafkaClientsJmxCollector(Set<MetricName> metricNames, MBeanServer mBeanServer) {
         this.metricNames = metricNames;
         this.mBeanServer = mBeanServer;
+        this.kafkaDomainFound = new HashMap<>();
+        initDomains();
+    }
+
+    void initDomains() {
+        List<String> beanDomains = Arrays.asList(mBeanServer.getDomains());
+        KafkaClientsDomain.KAFKA_CLIENTS_DOMAINS.forEach(domain -> {
+            if (beanDomains.contains(domain)){
+                kafkaDomainFound.put(domain, true);
+            } else {
+                kafkaDomainFound.put(domain, false);
+            }
+        });
     }
 
 
@@ -36,8 +48,9 @@ public class KafkaClientsJmxCollector extends Collector {
      * example:
      *  String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      * */
-    private ObjectName getObjectNameFromString(final String domainName, final String objectName) {
-        String objectNameWithDomain = domainName + ":" + "type" + "=" + objectName + ",*";
+    private ObjectName getObjectNameFromString(final String domainName, final String objectName, final String id) {
+        String objectNameWithDomain = domainName + ":" + "type" + "=" + objectName + ",client-id="+id;
+        System.out.println(objectNameWithDomain);
         ObjectName responseObjectName = null;
         try {
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
@@ -52,8 +65,9 @@ public class KafkaClientsJmxCollector extends Collector {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Number> T getMBeanAttributeValue(final String domainName, final String mBeanObjectName, final String attribute, final Class<T> returnType) {
-        ObjectName objectName = getObjectNameFromString(domainName, mBeanObjectName);
+    public <T extends Number> T getMBeanAttributeValue(final String domainName, final String mBeanObjectName, final String attribute, final String id, final Class<T> returnType) {
+        System.out.println(String.format("domainName:%s ; mBeanObjectName:%s ; attribute:%s ; client-id:%s", domainName, mBeanObjectName, attribute, id));
+        ObjectName objectName = getObjectNameFromString(domainName, mBeanObjectName, id);
         if (objectName == null) {
             // This also indicates that the mbeanObject is not registered.
             // Check to see if it is an exceptions-$class object
@@ -120,8 +134,8 @@ public class KafkaClientsJmxCollector extends Collector {
         return null;
     }
 
-    public boolean validateMbeanObject(final String domainName, final String objectName) {
-        ObjectName mbeanObject = getObjectNameFromString(domainName, objectName);
+    public boolean validateMbeanObject(final String domainName, final String objectName, String id) {
+        ObjectName mbeanObject = getObjectNameFromString(domainName, objectName, id);
         if (mbeanObject == null) {
             String message = "Requested mbean object is not registered with the Platform MBean Server";
             throw new IllegalArgumentException(message);
@@ -141,12 +155,16 @@ public class KafkaClientsJmxCollector extends Collector {
     public List<MetricFamilySamples> collect() {
         List<MetricFamilySamples> mfs = new ArrayList<MetricFamilySamples>();
         for (MetricName metricName : metricNames) {
+            String id = metricName.tags().get("client-id");
             if ("producer-metrics".contains(metricName.group())) {
-                mfs.add(new GaugeMetricFamily(
+                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
                         formatMetricName(metricName),
                         metricName.description(),
-                        getMBeanAttributeValue(KafkaClientsDomain.KAFKA_PRODUCER_MXBEAN, metricName.group(), metricName.name(), Double.class)
-                ));
+                        Collections.singletonList("id"));
+                gaugeMetricFamily.addMetric(
+                        Collections.singletonList(id),
+                        getMBeanAttributeValue("kafka.producer", metricName.group(), metricName.name(), id, Double.class));
+                mfs.add(gaugeMetricFamily);
             }
         }
         return mfs;
