@@ -1,17 +1,20 @@
 package no.sysco.middleware.prometheus.kafka.common;
 
+import io.prometheus.client.Collector;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
+import java.util.List;
 import java.util.Set;
 
-public abstract class JmxMetricsCollector {
+//todo: doc
+public abstract class KafkaClientJmxCollector {
 
     private MBeanServer mBeanServer;
     private String domainName;
     private String metricType;
 
-    public JmxMetricsCollector(MBeanServer mBeanServer, String domainName, String type) {
+    public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName, String type) {
         this.mBeanServer = mBeanServer;
         this.domainName = domainName;
         this.metricType = type;
@@ -40,7 +43,8 @@ public abstract class JmxMetricsCollector {
 
     @SuppressWarnings("unchecked")
     public <T extends Number> T getMBeanAttributeValue(final String attribute, final String id, final Class<T> returnType) {
-        System.out.println(String.format("domainName:%s ; mBeanObjectName:%s ; attribute:%s ; client-id:%s", domainName, attribute, id));
+
+        System.out.println(String.format("domainName:%s ; attribute:%s ; client-id:%s", domainName, attribute, id));
         ObjectName objectName = getObjectNameFromString(id);
         if (objectName == null) {
             // This also indicates that the mbeanObject is not registered.
@@ -108,18 +112,12 @@ public abstract class JmxMetricsCollector {
         return null;
     }
 
-    public boolean validateMbeanObject(String id) {
-        ObjectName mbeanObject = getObjectNameFromString(id);
-        if (mbeanObject == null) {
-            String message = "Requested mbean object is not registered with the Platform MBean Server";
-            throw new IllegalArgumentException(message);
-        }
-        return mBeanServer.isRegistered(mbeanObject);
-    }
-
-    String formatMetricName(final MetricName metricName) {
+    protected String formatMetricName(final MetricName metricName) {
         String groupName = metricName.group().replace("-","_");
         String name = metricName.name().replace("-","_");
         return groupName + "_" + name;
     }
+
+    public abstract List<Collector.MetricFamilySamples> getMetrics();
+
 }

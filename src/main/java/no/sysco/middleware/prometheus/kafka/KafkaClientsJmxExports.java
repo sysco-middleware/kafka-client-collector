@@ -9,7 +9,7 @@ public class KafkaClientsJmxExports {
 
     public static synchronized void initialize(Set<MetricName> metricNameSet) {
         if (!initialized) {
-            new KafkaClientsJmxCollector(metricNameSet).register();
+            new ClientsJmxCollector(metricNameSet).register();
             initialized = true;
         }
     }

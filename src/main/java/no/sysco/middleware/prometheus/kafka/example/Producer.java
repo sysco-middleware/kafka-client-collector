@@ -2,21 +2,17 @@ package no.sysco.middleware.prometheus.kafka.example;
 
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.hotspot.DefaultExports;
-import no.sysco.middleware.prometheus.kafka.KafkaClientsJmxCollector;
+import no.sysco.middleware.prometheus.kafka.ClientsJmxCollector;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
 import java.util.*;
-
-import static java.util.Collections.addAll;
 
 public class Producer {
     public static void main(String[] args) throws Exception {
@@ -53,14 +49,14 @@ public class Producer {
             }};
 
         //.addAll(kafkaProducer2.metrics().keySet());
-        KafkaClientsJmxCollector kafkaClientsJmxCollector = new KafkaClientsJmxCollector(metrics);
-//        boolean b = kafkaClientsJmxCollector.validateMbeanObject(domain,"producer-metrics", id);
+        ClientsJmxCollector clientsJmxCollector = new ClientsJmxCollector(metrics);
+//        boolean b = clientsJmxCollector.validateMbeanObject(domain,"producer-metrics", id);
 //        System.out.println(b);
-//        kafkaClientsJmxCollector.register();
-//        boolean b = kafkaClientsJmxCollector.validateMbeanObject("producer-metrics");
-//        Double mBeanAttributeValue = kafkaClientsJmxCollector.getMBeanAttributeValue("kafka.producer","producer-metrics", "record-send-total", id,  Double.class);
+//        clientsJmxCollector.register();
+//        boolean b = clientsJmxCollector.validateMbeanObject("producer-metrics");
+//        Double mBeanAttributeValue = clientsJmxCollector.getMBeanAttributeValue("kafka.producer","producer-metrics", "record-send-total", id,  Double.class);
 //        System.out.println(mBeanAttributeValue);
-        kafkaClientsJmxCollector.register();
+        clientsJmxCollector.register();
 
         MBeanServer mBeanServer = ManagementFactory.getPlatformMBeanServer();
         System.out.println("Here " + Arrays.asList(mBeanServer.getDomains()));
