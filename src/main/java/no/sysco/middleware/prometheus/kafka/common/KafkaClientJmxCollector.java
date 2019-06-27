@@ -9,15 +9,12 @@ import java.util.Set;
 
 //todo: doc
 public abstract class KafkaClientJmxCollector {
-
     private MBeanServer mBeanServer;
     private String domainName;
-    private String metricType;
 
-    public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName, String type) {
+    public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName) {
         this.mBeanServer = mBeanServer;
         this.domainName = domainName;
-        this.metricType = type;
     }
 
     /**
@@ -25,7 +22,7 @@ public abstract class KafkaClientJmxCollector {
      * example:
      *  String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      * */
-    private ObjectName getObjectNameFromString(final String id) {
+    private ObjectName getObjectNameFromString(final String metricType, final String id) {
         String objectNameWithDomain = domainName + ":" + "type" + "=" + metricType + ",client-id="+id;
         System.out.println(objectNameWithDomain);
         ObjectName responseObjectName = null;
@@ -42,10 +39,10 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Number> T getMBeanAttributeValue(final String attribute, final String id, final Class<T> returnType) {
+    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
 
-        System.out.println(String.format("domainName:%s ; attribute:%s ; client-id:%s", domainName, attribute, id));
-        ObjectName objectName = getObjectNameFromString(id);
+        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; client-id:%s", domainName, metricType, attribute, id));
+        ObjectName objectName = getObjectNameFromString(metricType, id);
         if (objectName == null) {
             // This also indicates that the mbeanObject is not registered.
             // Check to see if it is an exceptions-$class object
