@@ -20,19 +20,19 @@ public class Producer {
         final KafkaProducer<String, String> kafkaProducer1 = new KafkaProducer<>(getProducerProps(id1));
         final KafkaProducer<String, String> kafkaProducer2 = new KafkaProducer<>(getProducerProps(id2));
 
-//        DefaultExports.initialize();
+        DefaultExports.initialize();
         HTTPServer server = new HTTPServer(8080);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
 
         Set<MetricName> metrics1 = kafkaProducer1.metrics().keySet();
         Set<MetricName> metrics2 = kafkaProducer2.metrics().keySet();
-        HashSet<MetricName> metrics = new HashSet<MetricName>() {{
-                addAll(metrics1);
-                addAll(metrics2);
-            }};
+//        HashSet<MetricName> metrics = new HashSet<MetricName>() {{
+//                addAll(metrics1);
+//                addAll(metrics2);
+//            }};
 
-        KafkaClientsJmxExports.initialize(metrics);
+        KafkaClientsJmxExports.initialize(metrics1, metrics2);
 
 
         while(true){

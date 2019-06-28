@@ -41,7 +41,7 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
+    private <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
 
         System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; client-id:%s", domainName, metricType, attribute, id));
         ObjectName objectName = getObjectNameFromString(metricType, id);
@@ -111,7 +111,7 @@ public abstract class KafkaClientJmxCollector {
         return null;
     }
 
-    protected String formatMetricName(final MetricName metricName) {
+    private String formatMetricName(final MetricName metricName) {
         String groupName = metricName.group().replace("-","_");
         String name = metricName.name().replace("-","_");
         return groupName + "_" + name;

@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ClientsJmxCollector extends Collector {
     private static final Logger LOGGER = Logger.getLogger(ClientsJmxCollector.class.getName());
 
-    public final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
+    private final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
             ProducerJmxCollector.DOMAIN_NAME,
             ConsumerJmxCollector.DOMAIN_NAME,
             AdminClientJmxCollector.DOMAIN_NAME,
@@ -29,11 +29,11 @@ public class ClientsJmxCollector extends Collector {
     private Map<String, Boolean> kafkaDomainFound;
     private List<KafkaClientJmxCollector> collectors;
 
-    public ClientsJmxCollector(Set<MetricName> allMetricNames) {
+    ClientsJmxCollector(Set<MetricName> allMetricNames) {
         this(allMetricNames, ManagementFactory.getPlatformMBeanServer());
     }
 
-    public ClientsJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer) {
+    private ClientsJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer) {
         this.kafkaDomainFound = findKafkaDomains(mBeanServer.getDomains());
         this.collectors = instantiateCollectors(kafkaDomainFound, allMetricNames);
     }
