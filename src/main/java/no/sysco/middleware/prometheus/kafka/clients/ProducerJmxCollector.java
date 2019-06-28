@@ -17,12 +17,12 @@ import java.util.stream.Collectors;
 // producer-metrics
 public class ProducerJmxCollector extends KafkaClientJmxCollector {
     public static String DOMAIN_NAME = "kafka.producer";
-    public static String METRIC_TYPE = "producer-metrics";
+    public static String PRODUCER_METRIC_TYPE = "producer-metrics";
     private Set<MetricName> metricNames;
 
     private ProducerJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer, String domainName) {
         super(mBeanServer, domainName);
-        this.metricNames = allMetricNames.stream().filter(metric -> METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
+        this.metricNames = allMetricNames.stream().filter(metric -> PRODUCER_METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
     }
 
     public ProducerJmxCollector(Set<MetricName> metricNames) {
@@ -33,36 +33,9 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         );
     }
 
-    /**
-     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
-     *                      |                   |                   |                       |
-     *                      |                   |                   |                       |
-     *  BEAN             domain             objectName          objectName              objectName
-     *                                          |                   |
-     *                                          |                   |
-     *  MetricName                      metricName.group()     metricName.name()
-     *                                          |                   |
-     *                                          |                   |
-     *  MetricFamilySamples           format(metricName)    metricName.description()
-     * */
     @Override
     public List<Collector.MetricFamilySamples> getMetrics() {
-        List<Collector.MetricFamilySamples> mfs = new ArrayList<>();
-        for (MetricName metricName : metricNames) {
-            String id = metricName.tags().get("client-id");
-            if (METRIC_TYPE.contains(metricName.group())) {
-                // todo: support counters, all metric.name() which contains `-total`
-                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                        formatMetricName(metricName),
-                        metricName.description(),
-                        Collections.singletonList("id"));
-                gaugeMetricFamily.addMetric(
-                        Collections.singletonList(id),
-                        getMBeanAttributeValue(METRIC_TYPE, metricName.name(), id, Double.class));
-                mfs.add(gaugeMetricFamily);
-            }
-        }
-        return mfs;
+        return getMetrics(PRODUCER_METRIC_TYPE, metricNames);
     }
 
 

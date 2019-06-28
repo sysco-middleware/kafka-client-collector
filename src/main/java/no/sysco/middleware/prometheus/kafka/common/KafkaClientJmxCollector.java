@@ -1,13 +1,18 @@
 package no.sysco.middleware.prometheus.kafka.common;
 
 import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 //todo: doc
+// todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
     private MBeanServer mBeanServer;
     private String domainName;
@@ -23,7 +28,7 @@ public abstract class KafkaClientJmxCollector {
      *  String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      * */
     private ObjectName getObjectNameFromString(final String metricType, final String id) {
-        String objectNameWithDomain = domainName + ":" + "type" + "=" + metricType + ",client-id="+id;
+        String objectNameWithDomain = domainName + ":type=" + metricType + ",client-id="+id;
         System.out.println(objectNameWithDomain);
         ObjectName responseObjectName = null;
         try {
@@ -115,6 +120,52 @@ public abstract class KafkaClientJmxCollector {
         return groupName + "_" + name;
     }
 
+    public List<Collector.MetricFamilySamples> getMetrics(final String metricType, final Set<MetricName> metricNames) {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        for (MetricName metricName : metricNames) {
+            String id = metricName.tags().get("client-id");
+            if (metricType.contains(metricName.group())) {
+                if (metricName.name().contains("-total")){
+                    CounterMetricFamily counterMetricFamily = new CounterMetricFamily(
+                            formatMetricName(metricName),
+                            metricName.description(),
+                            Collections.singletonList("id")
+                    );
+                    counterMetricFamily.addMetric(
+                            Collections.singletonList(id),
+                            getMBeanAttributeValue(metricType, metricName.name(), id, Long.class)
+                    );
+                    metricFamilySamples.add(counterMetricFamily);
+                } else {
+                    GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                            formatMetricName(metricName),
+                            metricName.description(),
+                            Collections.singletonList("id")
+                    );
+                    gaugeMetricFamily.addMetric(
+                            Collections.singletonList(id),
+                            getMBeanAttributeValue(metricType, metricName.name(), id, Double.class)
+                    );
+                    metricFamilySamples.add(gaugeMetricFamily);
+                }
+
+            }
+        }
+        return metricFamilySamples;
+    }
+
+    /**
+     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
+     *                      |                   |                   |                       |
+     *                      |                   |                   |                       |
+     *  BEAN             domain             objectName          objectName              objectName
+     *                                          |                   |
+     *                                          |                   |
+     *  MetricName                      metricName.group()     metricName.name()
+     *                                          |                   |
+     *                                          |                   |
+     *  MetricFamilySamples           format(metricName)    metricName.description()
+     * */
     public abstract List<Collector.MetricFamilySamples> getMetrics();
 
 }

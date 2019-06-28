@@ -30,18 +30,10 @@ public class Consumer {
 
         final KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(getConsumerProps(id1, group1));
 
-        Map<MetricName, ? extends Metric> metrics = kafkaConsumer.metrics();
-        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
-            System.out.println(entry.getKey());
-            KafkaMetric value = (KafkaMetric) entry.getValue();
-            System.out.println(value.metricValue());
-            System.out.println();
-        }
-
 //        DefaultExports.initialize();
         HTTPServer server = new HTTPServer(8081);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-        KafkaClientsJmxExports.initialize(metrics.keySet());
+        KafkaClientsJmxExports.initialize(kafkaConsumer.metrics().keySet());
 
         kafkaConsumer.subscribe(Collections.singleton(topic));
         while (true) {

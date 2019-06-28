@@ -2,6 +2,7 @@ package no.sysco.middleware.prometheus.kafka;
 
 import io.prometheus.client.Collector;
 
+import no.sysco.middleware.prometheus.kafka.clients.AdminClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.clients.ConsumerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
@@ -13,12 +14,14 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 //todo: doc
+// todo: logger usage (avoid dependencies)
 public class ClientsJmxCollector extends Collector {
     private static final Logger LOGGER = Logger.getLogger(ClientsJmxCollector.class.getName());
 
     public final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
             ProducerJmxCollector.DOMAIN_NAME,
-            ConsumerJmxCollector.DOMAIN_NAME
+            ConsumerJmxCollector.DOMAIN_NAME,
+            AdminClientJmxCollector.DOMAIN_NAME
     );
 
     private Map<String, Boolean> kafkaDomainFound;
@@ -55,6 +58,8 @@ public class ClientsJmxCollector extends Collector {
                     collectors.add(new ProducerJmxCollector(allMetricNames));
                 } else if(ConsumerJmxCollector.DOMAIN_NAME.equals(domain)) {
                     collectors.add(new ConsumerJmxCollector(allMetricNames));
+                } else if (AdminClientJmxCollector.DOMAIN_NAME.equals(domain)) {
+                    collectors.add(new AdminClientJmxCollector(allMetricNames));
                 }
             }
         }
