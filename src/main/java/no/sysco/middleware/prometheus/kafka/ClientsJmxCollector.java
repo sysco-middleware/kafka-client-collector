@@ -5,6 +5,7 @@ import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.clients.AdminClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.clients.ConsumerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
+import no.sysco.middleware.prometheus.kafka.clients.StreamsJmxCollector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import org.apache.kafka.common.MetricName;
 import javax.management.MBeanServer;
@@ -21,7 +22,8 @@ public class ClientsJmxCollector extends Collector {
     public final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
             ProducerJmxCollector.DOMAIN_NAME,
             ConsumerJmxCollector.DOMAIN_NAME,
-            AdminClientJmxCollector.DOMAIN_NAME
+            AdminClientJmxCollector.DOMAIN_NAME,
+            StreamsJmxCollector.DOMAIN_NAME
     );
 
     private Map<String, Boolean> kafkaDomainFound;
@@ -60,6 +62,8 @@ public class ClientsJmxCollector extends Collector {
                     collectors.add(new ConsumerJmxCollector(allMetricNames));
                 } else if (AdminClientJmxCollector.DOMAIN_NAME.equals(domain)) {
                     collectors.add(new AdminClientJmxCollector(allMetricNames));
+                } else if (StreamsJmxCollector.DOMAIN_NAME.equals(domain)) {
+                    collectors.add(new StreamsJmxCollector(allMetricNames));
                 }
             }
         }

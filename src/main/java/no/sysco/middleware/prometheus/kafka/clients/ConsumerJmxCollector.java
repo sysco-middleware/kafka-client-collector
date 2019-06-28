@@ -15,9 +15,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
-// consumer-metrics
-// consumer-fetch-manager-metrics
-// consumer-coordinator-metrics
+// Domains will look like :
+// [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.consumer, java.nio]
 public class ConsumerJmxCollector extends KafkaClientJmxCollector {
     // domain
     public static String DOMAIN_NAME = "kafka.consumer";

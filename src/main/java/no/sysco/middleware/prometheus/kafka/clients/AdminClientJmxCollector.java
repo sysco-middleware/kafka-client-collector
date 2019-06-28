@@ -10,15 +10,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+// Domains will look like :
+// [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.admin.client, java.nio]
 public class AdminClientJmxCollector extends KafkaClientJmxCollector {
 
     public static String DOMAIN_NAME = "kafka.admin.client";
     private static String ADMIN_CLIENT_METRIC_TYPE = "admin-client-metrics";
-    private Set<MetricName> metricNames;
+    private static String ADMIN_CLIENT_NODE_METRIC_TYPE = "admin-client-node-metrics";
+
+    private Set<MetricName> adminClientMetricNames;
 
     private AdminClientJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer, String domainName) {
         super(mBeanServer, domainName);
-        this.metricNames = allMetricNames.stream().filter(metric -> ADMIN_CLIENT_METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
+        this.adminClientMetricNames = allMetricNames.stream().filter(metric -> ADMIN_CLIENT_METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
     }
 
     public AdminClientJmxCollector(Set<MetricName> allMetricNames) {
@@ -31,6 +35,6 @@ public class AdminClientJmxCollector extends KafkaClientJmxCollector {
 
     @Override
     public List<Collector.MetricFamilySamples> getMetrics() {
-        return getMetrics(ADMIN_CLIENT_METRIC_TYPE, metricNames);
+        return getMetrics(ADMIN_CLIENT_METRIC_TYPE, adminClientMetricNames);
     }
 }

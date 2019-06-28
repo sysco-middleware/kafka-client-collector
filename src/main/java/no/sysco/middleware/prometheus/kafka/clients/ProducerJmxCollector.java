@@ -8,21 +8,22 @@ import org.apache.kafka.common.MetricName;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 // producer-metrics
+// Domains will look like :
+// [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.producer, java.nio]
 public class ProducerJmxCollector extends KafkaClientJmxCollector {
     public static String DOMAIN_NAME = "kafka.producer";
-    public static String PRODUCER_METRIC_TYPE = "producer-metrics";
-    private Set<MetricName> metricNames;
+
+    private static String PRODUCER_METRIC_TYPE = "producer-metrics";
+    private Set<MetricName> producerMetricNames;
 
     private ProducerJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer, String domainName) {
         super(mBeanServer, domainName);
-        this.metricNames = allMetricNames.stream().filter(metric -> PRODUCER_METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
+        this.producerMetricNames = allMetricNames.stream().filter(metric -> PRODUCER_METRIC_TYPE.equals(metric.group())).collect(Collectors.toSet());
     }
 
     public ProducerJmxCollector(Set<MetricName> metricNames) {
@@ -35,8 +36,7 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
 
     @Override
     public List<Collector.MetricFamilySamples> getMetrics() {
-        return getMetrics(PRODUCER_METRIC_TYPE, metricNames);
+        return getMetrics(PRODUCER_METRIC_TYPE, producerMetricNames);
     }
-
 
 }

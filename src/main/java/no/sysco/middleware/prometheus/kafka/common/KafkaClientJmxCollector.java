@@ -6,12 +6,9 @@ import io.prometheus.client.GaugeMetricFamily;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-//todo: doc
+// todo: doc
 // todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
     private MBeanServer mBeanServer;
@@ -124,6 +121,7 @@ public abstract class KafkaClientJmxCollector {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String id = metricName.tags().get("client-id");
+            //String nodeId = metricName.tags().get("node-id"); todo;
             if (metricType.contains(metricName.group())) {
                 if (metricName.name().contains("-total")){
                     CounterMetricFamily counterMetricFamily = new CounterMetricFamily(
