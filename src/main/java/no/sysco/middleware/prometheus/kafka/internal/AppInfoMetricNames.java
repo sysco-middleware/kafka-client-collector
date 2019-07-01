@@ -13,7 +13,7 @@ public class AppInfoMetricNames {
     private final static String APP_INFO_METRICS = "app-info";
     private final static String KAFKA_METRICS_COUNT = "kafka-metrics-count";
 
-    public static Set<MetricName> INITIAL_METRIC_NAMES = new HashSet<>(
+    public static Set<MetricName> INITIAL_APP_INFO_METRIC_NAMES = new HashSet<>(
             Arrays.asList(
                     new MetricName(
                             "version",
@@ -35,5 +35,24 @@ public class AppInfoMetricNames {
                     )
 
             ));
+
+    public static Set<MetricName> getAppInfoMetricNames(Set<String> clientIds) {
+        Set<MetricName> metricNames = new HashSet<>();
+        for (String clientId : clientIds) {
+            for (MetricName metricName : INITIAL_APP_INFO_METRIC_NAMES) {
+                metricNames.add(
+                        new MetricName(
+                                metricName.name(),
+                                metricName.group(),
+                                metricName.description(),
+                                new HashMap<String, String>() {{
+                                    put("client-id", clientId);
+                                }}
+                        )
+                );
+            }
+        }
+        return metricNames;
+    }
 
 }

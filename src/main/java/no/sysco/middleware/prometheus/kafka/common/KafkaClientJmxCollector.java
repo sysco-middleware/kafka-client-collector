@@ -14,8 +14,8 @@ import java.util.Set;
 // todo: doc
 // todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
-    private final  MBeanServer mBeanServer;
-    private final String domainName;
+    public final MBeanServer mBeanServer;
+    public final String domainName;
 
     public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName) {
         this.mBeanServer = mBeanServer;
@@ -112,7 +112,7 @@ public abstract class KafkaClientJmxCollector {
         }
         return null;
     }
-
+//
     private String formatMetricName(final MetricName metricName) {
         String groupName = metricName.group().replace("-","_");
         String name = metricName.name().replace("-","_");
@@ -153,19 +153,19 @@ public abstract class KafkaClientJmxCollector {
         }
         return metricFamilySamples;
     }
-
-    /**
-     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
-     *                      |                   |                   |                       |
-     *                      |                   |                   |                       |
-     *  BEAN             domain             objectName          objectName              objectName
-     *                                          |                   |
-     *                                          |                   |
-     *  MetricName                      metricName.group()     metricName.name()
-     *                                          |                   |
-     *                                          |                   |
-     *  MetricFamilySamples           format(metricName)    metricName.description()
-     * */
-    public abstract List<Collector.MetricFamilySamples> getMetrics();
+//
+//    /**
+//     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
+//     *                      |                   |                   |                       |
+//     *                      |                   |                   |                       |
+//     *  BEAN             domain             objectName          objectName              objectName
+//     *                                          |                   |
+//     *                                          |                   |
+//     *  MetricName                      metricName.group()     metricName.name()
+//     *                                          |                   |
+//     *                                          |                   |
+//     *  MetricFamilySamples           format(metricName)    metricName.description()
+//     * */
+//    public abstract List<Collector.MetricFamilySamples> getMetrics();
 
 }
