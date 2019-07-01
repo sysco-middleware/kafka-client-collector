@@ -27,7 +27,7 @@ public class Consumer {
 //        DefaultExports.initialize();
         HTTPServer server = new HTTPServer(8081);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-        KafkaClientsJmxExports.initialize(kafkaConsumer.metrics().keySet());
+//        KafkaClientsJmxExports.initialize(kafkaConsumer.metrics().keySet());
 
         kafkaConsumer.subscribe(Collections.singleton(topic));
         while (true) {

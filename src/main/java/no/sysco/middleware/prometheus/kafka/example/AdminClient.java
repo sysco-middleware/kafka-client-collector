@@ -32,7 +32,7 @@ public class AdminClient {
         HashSet<MetricName> metrics = new HashSet<MetricName>() {{
             addAll(metrics1);
         }};
-        KafkaClientsJmxExports.initialize(metrics);
+//        KafkaClientsJmxExports.initialize(metrics);
 
         MBeanServer platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
         System.out.println(Arrays.asList(platformMBeanServer.getDomains()));

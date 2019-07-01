@@ -44,7 +44,7 @@ public class Streams {
             System.out.println();
         }
 
-        KafkaClientsJmxExports.initialize(metrics.keySet());
+//        KafkaClientsJmxExports.initialize(metrics.keySet());
         kafkaStreams.start();
 
     }
