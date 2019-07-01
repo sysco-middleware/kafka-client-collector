@@ -122,29 +122,29 @@ public abstract class KafkaClientJmxCollector {
     public List<Collector.MetricFamilySamples> getMetrics(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
-            String id = metricName.tags().get("client-id");
+            String clientId = metricName.tags().get("client-id");
             //String nodeId = metricName.tags().get("node-id"); todo;
             if (metricType.contains(metricName.group())) {
                 if (metricName.name().contains("-total")){
                     CounterMetricFamily counterMetricFamily = new CounterMetricFamily(
                             formatMetricName(metricName),
                             metricName.description(),
-                            Collections.singletonList("id")
+                            Collections.singletonList("client-id")
                     );
                     counterMetricFamily.addMetric(
-                            Collections.singletonList(id),
-                            getMBeanAttributeValue(metricType, metricName.name(), id, Long.class)
+                            Collections.singletonList(clientId),
+                            getMBeanAttributeValue(metricType, metricName.name(), clientId, Long.class)
                     );
                     metricFamilySamples.add(counterMetricFamily);
                 } else {
                     GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
                             formatMetricName(metricName),
                             metricName.description(),
-                            Collections.singletonList("id")
+                            Collections.singletonList("client-id")
                     );
                     gaugeMetricFamily.addMetric(
-                            Collections.singletonList(id),
-                            getMBeanAttributeValue(metricType, metricName.name(), id, Double.class)
+                            Collections.singletonList(clientId),
+                            getMBeanAttributeValue(metricType, metricName.name(), clientId, Double.class)
                     );
                     metricFamilySamples.add(gaugeMetricFamily);
                 }

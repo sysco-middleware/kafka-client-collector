@@ -30,10 +30,6 @@ public class Producer {
 
         Set<MetricName> metrics1 = kafkaProducer1.metrics().keySet();
         Set<MetricName> metrics2 = kafkaProducer2.metrics().keySet();
-//        HashSet<MetricName> metrics = new HashSet<MetricName>() {{
-//                addAll(metrics1);
-//                addAll(metrics2);
-//            }};
 
         KafkaClientsJmxExports.initialize(metrics1, metrics2);
 
@@ -43,7 +39,7 @@ public class Producer {
             long now = Instant.now().toEpochMilli();
 
             kafkaProducer1.send(
-                    new ProducerRecord<String, String>(topic, String.valueOf(now) + " p1", now + " milliseconds"),
+                    new ProducerRecord<>(topic, now + " p1", now + " milliseconds"),
                     (metadata, exception)-> {
                         if (exception==null){
                             System.out.println("successfully sent");
@@ -54,7 +50,7 @@ public class Producer {
             );
 
             kafkaProducer2.send(
-                    new ProducerRecord<String, String>(topic, String.valueOf(now) + " p2", now + " milliseconds"),
+                    new ProducerRecord<>(topic, now + " p2", now + " milliseconds"),
                     (metadata, exception)-> {
                         if (exception==null){
                             System.out.println("successfully sent");

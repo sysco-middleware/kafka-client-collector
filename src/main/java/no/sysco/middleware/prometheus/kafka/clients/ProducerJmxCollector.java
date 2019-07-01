@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class ProducerJmxCollector extends KafkaClientJmxCollector {
     public static String DOMAIN_NAME = "kafka.producer";
 
-    private static String PRODUCER_METRIC_TYPE = "producer-metrics";
+    public static String PRODUCER_METRIC_TYPE = "producer-metrics";
     private Set<MetricName> producerMetricNames;
 
     private ProducerJmxCollector(Set<MetricName> allMetricNames, MBeanServer mBeanServer, String domainName) {
