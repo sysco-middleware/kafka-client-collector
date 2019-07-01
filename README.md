@@ -3,6 +3,10 @@ Kafka clients JMX collector is [Custom collector](https://github.com/prometheus/
 
 `Kafka clients JMX collector` does proxy JMX metrics from kafka clients.
 
+## Versioning 
+todo:
+0.6.0-2.1.1 -> {prometheus.kafka-clients}
+
 ## Usage
 Import dependency.
 ```xml
@@ -15,7 +19,18 @@ Import dependency.
 
 Use `KafkaClientsJmxExports` to initialize collectors for kafka-clients JMX metrics to conveniently register them.
 ```java
-KafkaClientsJmxExports.initialize();
+Set<MetricName> metricNames = kafkaProducer.metrics().keySet();
+
+KafkaClientsJmxExports.initialize(metricNames);
+```
+
+or if you have several instances
+
+```java
+Set<MetricName> metricNames1 = kafkaProducer.metrics().keySet();
+Set<MetricName> metricNames2 = kafkaConsumer.metrics().keySet();
+
+KafkaClientsJmxExports.initialize(metricNames1, metricNames2);
 ```
 
 ## Idea
