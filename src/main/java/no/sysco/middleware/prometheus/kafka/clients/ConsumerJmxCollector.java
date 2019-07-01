@@ -1,15 +1,12 @@
 package no.sysco.middleware.prometheus.kafka.clients;
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.CounterMetricFamily;
-import io.prometheus.client.GaugeMetricFamily;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;

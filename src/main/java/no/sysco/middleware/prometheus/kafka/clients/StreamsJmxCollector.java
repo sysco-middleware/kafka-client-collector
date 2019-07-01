@@ -1,7 +1,6 @@
 package no.sysco.middleware.prometheus.kafka.clients;
 
 import io.prometheus.client.Collector;
-import no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import org.apache.kafka.common.MetricName;
 

@@ -8,8 +8,11 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.serialization.StringSerializer;
+
 import java.time.Instant;
-import java.util.*;
+import java.util.Properties;
+import java.util.Set;
+import java.util.UUID;
 
 public class Producer {
     public static void main(String[] args) throws Exception {

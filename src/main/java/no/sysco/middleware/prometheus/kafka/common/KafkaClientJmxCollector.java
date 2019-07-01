@@ -6,13 +6,16 @@ import io.prometheus.client.GaugeMetricFamily;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 // todo: doc
 // todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
-    private MBeanServer mBeanServer;
-    private String domainName;
+    private final  MBeanServer mBeanServer;
+    private final String domainName;
 
     public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName) {
         this.mBeanServer = mBeanServer;
@@ -73,8 +76,7 @@ public abstract class KafkaClientJmxCollector {
                 try {
                     number = Double.parseDouble(value.toString());
                 } catch (NumberFormatException e) {
-                    String message = "Failed to parse attribute value to number";
-                    System.out.println(e);
+                    String message = "Failed to parse attribute value to number: "+e.getMessage();
                     throw new IllegalArgumentException(message);
                 }
             }

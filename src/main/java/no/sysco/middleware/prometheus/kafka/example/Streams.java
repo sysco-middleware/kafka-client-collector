@@ -2,17 +2,14 @@ package no.sysco.middleware.prometheus.kafka.example;
 
 import io.prometheus.client.exporter.HTTPServer;
 import no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.Produced;
 
 import javax.management.MBeanServer;
 import java.io.IOException;
