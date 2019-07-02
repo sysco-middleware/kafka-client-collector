@@ -1,6 +1,9 @@
 package no.sysco.middleware.prometheus.kafka.clients;
 
 
+import io.prometheus.client.Collector;
+import io.prometheus.client.CounterMetricFamily;
+import io.prometheus.client.GaugeMetricFamily;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.internal.AppInfoMetricNames;
 import no.sysco.middleware.prometheus.kafka.internal.ProducerMetricNames;
@@ -9,8 +12,7 @@ import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
 import java.lang.management.ManagementFactory;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 // producer-metrics
 // Domains will look like :
@@ -28,12 +30,61 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         this.appInfoMetricNames = initAppInfoMetricNamesWithProperties();
     }
 
+    @Override
+    public List<Collector.MetricFamilySamples> getMetrics() {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        HashSet<MetricName> allMetricNames = new HashSet<MetricName>() {{
+            addAll(producerMetricNames);
+            addAll(appInfoMetricNames);
+        }};
+        for (MetricName metricName : allMetricNames) {
+            String clientId = metricName.tags().get("client-id");
+            //String nodeId = metricName.tags().get("node-id"); todo;
+            if (PRODUCER_METRIC_TYPE.contains(metricName.group())) {
+                if (metricName.name().contains("-total")){
+                    CounterMetricFamily counterMetricFamily = new CounterMetricFamily(
+                            formatMetricName(metricName),
+                            metricName.description(),
+                            Collections.singletonList("client-id")
+                    );
+                    counterMetricFamily.addMetric(
+                            Collections.singletonList(clientId),
+                            getMBeanAttributeValue(PRODUCER_METRIC_TYPE, metricName.name(), clientId, Long.class)
+                    );
+                    metricFamilySamples.add(counterMetricFamily);
+                } else {
+                    GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                            formatMetricName(metricName),
+                            metricName.description(),
+                            Collections.singletonList("client-id")
+                    );
+                    gaugeMetricFamily.addMetric(
+                            Collections.singletonList(clientId),
+                            getMBeanAttributeValue(PRODUCER_METRIC_TYPE, metricName.name(), clientId, Double.class)
+                    );
+                    metricFamilySamples.add(gaugeMetricFamily);
+                }
+
+            }
+        }
+        return metricFamilySamples;
+    }
+
     public ProducerJmxCollector() {
         this(
                 ManagementFactory.getPlatformMBeanServer(),
                 PRODUCER_DOMAIN
         );
     }
+
+//
+//    public void getAttributeValue(String attribute) {
+//        Set<String> kafkaClientIds = getKafkaClientIds();
+//        for (String id : kafkaClientIds) {
+//            Double mBeanAttributeValue = getMBeanAttributeValue(PRODUCER_METRIC_TYPE, attribute, id, Double.class);
+//            System.out.println("GET_ATTRIBUTE +" + attribute + " > " + mBeanAttributeValue);
+//        }
+//    }
 
     private Set<String> getKafkaClientIds() {
         Set<ObjectName> objectNamesFromString = getObjectNamesFromString(domainName, PRODUCER_METRIC_TYPE);

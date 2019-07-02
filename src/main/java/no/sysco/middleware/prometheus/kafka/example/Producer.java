@@ -31,7 +31,7 @@ public class Producer {
         Set<MetricName> metrics1 = kafkaProducer1.metrics().keySet();
         Set<MetricName> metrics2 = kafkaProducer2.metrics().keySet();
 
-//        KafkaClientsJmxExports.initialize(metrics1, metrics2);
+        KafkaClientsJmxExports.initialize();
 
 
         while(true){

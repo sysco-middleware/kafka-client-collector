@@ -44,22 +44,11 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
-
+    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
         System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; client-id:%s", domainName, metricType, attribute, id));
+
         ObjectName objectName = getObjectNameFromString(metricType, id);
         if (objectName == null) {
-            // This also indicates that the mbeanObject is not registered.
-            // Check to see if it is an exceptions-$class object
-            if (metricType.startsWith("exceptions")) {
-                // The exceptions object is not added to the MBeanServer, as there
-                // were no HTTP client exceptions raised yet. Return 0.
-                if (returnType.equals(Double.class)) {
-                    return (T) Double.valueOf(0d);
-                } else if (returnType.equals(Long.class)) {
-                    return (T) Long.valueOf(0L);
-                }
-            }
             String message = "Requested MBean Object not found";
             throw new IllegalArgumentException(message);
         }
@@ -107,13 +96,12 @@ public abstract class KafkaClientJmxCollector {
             } else {
                 message = "The requested operation is not supported by the MBean Server ";
             }
-
             throw new IllegalArgumentException(message);
         }
         return null;
     }
-//
-    private String formatMetricName(final MetricName metricName) {
+
+    public String formatMetricName(final MetricName metricName) {
         String groupName = metricName.group().replace("-","_");
         String name = metricName.name().replace("-","_");
         return groupName + "_" + name;
@@ -166,6 +154,6 @@ public abstract class KafkaClientJmxCollector {
 //     *                                          |                   |
 //     *  MetricFamilySamples           format(metricName)    metricName.description()
 //     * */
-//    public abstract List<Collector.MetricFamilySamples> getMetrics();
+    public abstract List<Collector.MetricFamilySamples> getMetrics();
 
 }

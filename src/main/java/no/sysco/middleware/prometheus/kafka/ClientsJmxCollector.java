@@ -54,9 +54,8 @@ public class ClientsJmxCollector extends Collector {
     }
 
     public List<MetricFamilySamples> collect() {
-//        return kafkaClientJmxCollectors.stream()
-//                .flatMap(collector -> collector.getMetrics().stream())
-//                .collect(Collectors.toList());
-        return null;
+        return kafkaClientJmxCollectors.stream()
+                .flatMap(collector -> collector.getMetrics().stream())
+                .collect(Collectors.toList());
     }
 }
