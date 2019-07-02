@@ -39,7 +39,7 @@ public abstract class KafkaClientJmxCollector {
      * example:
      * String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      */
-    private ObjectName getObjectNameFromString(final String metricType, final String clientId) {
+    public ObjectName getObjectNameFromString(final String metricType, final String clientId) {
         String objectNameWithDomain = domainName + ":type=" + metricType + ",client-id=" + clientId;
         System.out.println(objectNameWithDomain);
         ObjectName responseObjectName = null;

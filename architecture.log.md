@@ -23,3 +23,11 @@ Ideas:
 new MetricName("record-send-rate", PRODUCER_METRICS, "The average number of records sent per second.",new HashMap<>())
 ``` 
 * Keep in mind that one java process can have several kafka-clients, which can be identified by `client-id`
+
+# 02.07.19
+## Producer metrics 
+Producer has 2 metric group : 
+* "producer-metrics" - has tags "client-id", which can be initialized at startup of application
+* "producer-topic-metrics" - has tags "client-id", "topic". Because of "topic", can be initialize dynamically at run-time.
+
+What is the best way to collect Metrics for second group.   
