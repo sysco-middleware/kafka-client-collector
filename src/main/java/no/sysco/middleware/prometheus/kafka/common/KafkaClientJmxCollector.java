@@ -56,8 +56,8 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String key, final String val, final Class<T> returnType) {
-        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; key:%s ; val:%s" , domainName, metricType, attribute, key, val));
+    public Double getMBeanAttributeValue(final String metricType, final String attribute, final String key, final String val) {
+        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; key:%s ; val:%s", domainName, metricType, attribute, key, val));
 
         ObjectName objectName = getObjectName(metricType, key, val);
         if (objectName == null) {
@@ -82,21 +82,8 @@ public abstract class KafkaClientJmxCollector {
                 }
             }
 
-            if (returnType.equals(number.getClass())) {
-                return (T) number;
-            } else if (returnType.equals(Short.class)) {
-                return (T) Short.valueOf(number.shortValue());
-            } else if (returnType.equals(Integer.class)) {
-                return (T) Integer.valueOf(number.intValue());
-            } else if (returnType.equals(Long.class)) {
-                return (T) Long.valueOf(number.longValue());
-            } else if (returnType.equals(Float.class)) {
-                return (T) Float.valueOf(number.floatValue());
-            } else if (returnType.equals(Double.class)) {
-                return (T) Double.valueOf(number.doubleValue());
-            } else if (returnType.equals(Byte.class)) {
-                return (T) Byte.valueOf(number.byteValue());
-            }
+            return number.doubleValue();
+
         } catch (AttributeNotFoundException | InstanceNotFoundException | ReflectionException | MBeanException e) {
             String message;
             if (e instanceof AttributeNotFoundException) {
@@ -110,7 +97,6 @@ public abstract class KafkaClientJmxCollector {
             }
             throw new IllegalArgumentException(message);
         }
-        return null;
     }
 
     public String formatMetricName(final MetricName metricName) {
@@ -130,7 +116,7 @@ public abstract class KafkaClientJmxCollector {
             );
             gaugeMetricFamily.addMetric(
                     Collections.singletonList(clientId),
-                    getMBeanAttributeValue(metricType, metricName.name(),"client-id", clientId, Double.class)
+                    getMBeanAttributeValue(metricType, metricName.name(), "client-id", clientId)
             );
             metricFamilySamples.add(gaugeMetricFamily);
         }

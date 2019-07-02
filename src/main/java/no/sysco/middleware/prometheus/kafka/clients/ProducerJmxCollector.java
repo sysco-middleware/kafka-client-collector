@@ -65,19 +65,6 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         List<String> collect = new ArrayList<>(getKafkaTopics());
         Iterator<String> iterator = collect.iterator();
 
-        while (iterator.hasNext()) {
-            String topic = iterator.next();
-//            Double value = getValue(ProducerMetricsTemplates.PRODUCER_METRIC_GROUP_NAME, "record-send-rate", "topic", topic);
-//            System.out.println(value);
-//            System.out.println("HH "+topic);
-//            ObjectName topic1 = getObjectName(ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME, "topic", topic);
-//            Double value = getMBeanAttributeValue(ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME, "byte-total", "topic", topic, Double.class);
-//            System.out.println("WAAAT "+ topic + " : "+ value);
-//
-//            ObjectName objectNameFromString = getObjectName(ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME,"topic", topic);
-//            Hashtable<String, String> keyPropertyList = objectNameFromString.getKeyPropertyList();
-//            System.out.println("HERE --> "+ keyPropertyList);
-        }
         return getMetrics(ProducerMetricsTemplates.PRODUCER_METRIC_GROUP_NAME, producerMetricNames);
     }
 
