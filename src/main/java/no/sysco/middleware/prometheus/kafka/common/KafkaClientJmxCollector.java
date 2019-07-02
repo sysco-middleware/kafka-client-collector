@@ -3,6 +3,7 @@ package no.sysco.middleware.prometheus.kafka.common;
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;
 import org.apache.kafka.common.MetricName;
+import org.apache.kafka.streams.KeyValue;
 
 import javax.management.*;
 import java.util.*;
@@ -39,12 +40,19 @@ public abstract class KafkaClientJmxCollector {
      * example:
      * String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      */
-    public ObjectName getObjectName(final String metricType, final String key, final String val) {
-        String objectNameWithDomain = domainName + ":type=" + metricType + "," + key + "=" + val;
-//        System.out.println(objectNameWithDomain);
+    public ObjectName getObjectName(final String metricType, final KeyValue<String, String>... keyVals) {
+        String startQuery = String.format("%s:type=%s", domainName, metricType);
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(startQuery);
+        for (KeyValue<String, String> keyVal : keyVals) {
+            String queryContinue = String.format(",%s=%s", keyVal.key, keyVal.value);
+            stringBuilder.append(queryContinue);
+        }
+        String query = stringBuilder.toString();
+        System.out.println("QUERY:   "+query);
         ObjectName responseObjectName = null;
         try {
-            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
+            ObjectName mbeanObjectName = new ObjectName(query);
             Set<ObjectName> objectNames = mBeanServer.queryNames(mbeanObjectName, null);
             for (ObjectName object : objectNames) {
                 responseObjectName = object;
@@ -56,10 +64,8 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public Double getMBeanAttributeValue(final String metricType, final String attribute, final String key, final String val) {
-        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; key:%s ; val:%s", domainName, metricType, attribute, key, val));
-
-        ObjectName objectName = getObjectName(metricType, key, val);
+    public Double getMBeanAttributeValue(final String metricType, final String attribute, final KeyValue<String, String>... keyValues) {
+        ObjectName objectName = getObjectName(metricType, keyValues);
         if (objectName == null) {
             String message = "Requested MBean Object not found";
             throw new IllegalArgumentException(message);
@@ -116,7 +122,7 @@ public abstract class KafkaClientJmxCollector {
             );
             gaugeMetricFamily.addMetric(
                     Collections.singletonList(clientId),
-                    getMBeanAttributeValue(metricType, metricName.name(), "client-id", clientId)
+                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId))
             );
             metricFamilySamples.add(gaugeMetricFamily);
         }
