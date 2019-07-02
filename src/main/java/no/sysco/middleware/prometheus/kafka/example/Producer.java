@@ -6,10 +6,13 @@ import no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
+import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -69,5 +72,14 @@ public class Producer {
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return properties;
+    }
+
+    static void printMetrics(Map<MetricName, Metric> metrics) {
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            System.out.println(entry.getKey());
+            KafkaMetric value = (KafkaMetric) entry.getValue();
+            System.out.println(value.metricValue());
+            System.out.println();
+        }
     }
 }

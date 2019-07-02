@@ -5,6 +5,7 @@ import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.internal.MetricNamesUtils;
 import no.sysco.middleware.prometheus.kafka.internal.ProducerMetricNames;
+import org.apache.kafka.clients.producer.internals.SenderMetricsRegistry;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.MBeanServer;
@@ -40,8 +41,11 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         return metricNames;
     }
 
+
     @Override
     public List<Collector.MetricFamilySamples> getMetrics() {
         return getMetrics(PRODUCER_METRIC_TYPE, producerMetricNames);
     }
+
+
 }
