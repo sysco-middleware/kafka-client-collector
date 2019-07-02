@@ -355,23 +355,4 @@ public class ProducerMetricNames {
                     ))
     );
 
-    public static Set<MetricName> getMetricNames(Set<String> clientIds) {
-        Set<MetricName> metricNames = new HashSet<>();
-        for (String clientId : clientIds) {
-            for (MetricName metricName : INITIAL_METRIC_NAMES) {
-                metricNames.add(
-                        new MetricName(
-                                metricName.name(),
-                                metricName.group(),
-                                metricName.description(),
-                                new HashMap<String, String>() {{
-                                    put("client-id", clientId);
-                                }}
-                        )
-                );
-            }
-        }
-        return metricNames;
-    }
-
 }
