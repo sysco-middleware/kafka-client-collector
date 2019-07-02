@@ -10,8 +10,8 @@ import java.util.*;
 // todo: doc
 // todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
-    private final MBeanServer mBeanServer;
-    private final String domainName;
+    protected final MBeanServer mBeanServer;
+    protected final String domainName;
 
     public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName) {
         this.mBeanServer = mBeanServer;
@@ -39,9 +39,9 @@ public abstract class KafkaClientJmxCollector {
      * example:
      * String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
      */
-    public ObjectName getObjectNameFromString(final String metricType, final String clientId) {
-        String objectNameWithDomain = domainName + ":type=" + metricType + ",client-id=" + clientId;
-        System.out.println(objectNameWithDomain);
+    public ObjectName getObjectName(final String metricType, final String key, final String val) {
+        String objectNameWithDomain = domainName + ":type=" + metricType + "," + key + "=" + val;
+//        System.out.println(objectNameWithDomain);
         ObjectName responseObjectName = null;
         try {
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
@@ -56,10 +56,10 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String id, final Class<T> returnType) {
-        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; client-id:%s", domainName, metricType, attribute, id));
+    public <T extends Number> T getMBeanAttributeValue(final String metricType, final String attribute, final String key, final String val, final Class<T> returnType) {
+        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; key:%s ; val:%s" , domainName, metricType, attribute, key, val));
 
-        ObjectName objectName = getObjectNameFromString(metricType, id);
+        ObjectName objectName = getObjectName(metricType, key, val);
         if (objectName == null) {
             String message = "Requested MBean Object not found";
             throw new IllegalArgumentException(message);
@@ -130,7 +130,7 @@ public abstract class KafkaClientJmxCollector {
             );
             gaugeMetricFamily.addMetric(
                     Collections.singletonList(clientId),
-                    getMBeanAttributeValue(metricType, metricName.name(), clientId, Double.class)
+                    getMBeanAttributeValue(metricType, metricName.name(),"client-id", clientId, Double.class)
             );
             metricFamilySamples.add(gaugeMetricFamily);
         }
