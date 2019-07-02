@@ -4,6 +4,7 @@ package no.sysco.middleware.prometheus.kafka.clients;
 import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.internal.ProducerMetricsTemplates;
+import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.*;
@@ -58,7 +59,8 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     public List<Collector.MetricFamilySamples> getMetrics() {
         Set<String> kafkaClientIds = getKafkaClientIds(ProducerMetricsTemplates.PRODUCER_METRIC_GROUP_NAME);
         System.out.println("IDS "+kafkaClientIds);
-        printObjectNames(getKafkaTopics());
+//        printObjectNames(getKafkaTopics());
+        printObjectNames(kafkaClientIds);
 
         List<String> collect = new ArrayList<>(getKafkaTopics());
         Iterator<String> iterator = collect.iterator();
@@ -79,10 +81,10 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         return getMetrics(ProducerMetricsTemplates.PRODUCER_METRIC_GROUP_NAME, producerMetricNames);
     }
 
-    public Double getValue(final String metricType, final String attribute, final String key, final String val) {
+    public Double getValue(final String attribute, final String clientId, final String topic) {
 //        System.out.println(String.format("domainName:%s ; metricType:%s ; attribute:%s ; key:%s ; val:%s" , domainName, metricType, attribute, key, val));
 
-        ObjectName objectName = getObjectName(metricType, key, val);
+        ObjectName objectName = getObjectNameClientTopic(ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME, clientId, topic);
         System.out.println("TUT "+ objectName);
 
         if (objectName == null) {
@@ -122,18 +124,38 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         }
     }
 
+    public ObjectName getObjectNameClientTopic(final String metricType, final String clientId, final String topic) {
+        String objectNameWithDomain =
+                ProducerMetricsTemplates.PRODUCER_DOMAIN + ":type=" +
+                ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME +
+                ",client-id=" + clientId + ",topic=" + topic;
+        ObjectName responseObjectName = null;
+        try {
+            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
+            Set<ObjectName> objectNames = mBeanServer.queryNames(mbeanObjectName, null);
+            for (ObjectName object : objectNames) {
+                System.out.println("FOUND "+ object);
+                responseObjectName = object;
+            }
+        } catch (MalformedObjectNameException mfe) {
+            throw new IllegalArgumentException(mfe.getMessage());
+        }
+        return responseObjectName;
+    }
+
+
+
     // kafka.producer:type=producer-topic-metrics,client-id=25862c0e-9da0-48f7-82b5-cdf077d1ff6a,topic=topic-2
-    public Map<String, Set<String>> getTopicsPerClient(final String topic) {
+    public Map<String, Set<String>> getTopicsPerClient(final String clientId) {
         String objectNameWithDomain =
                 ProducerMetricsTemplates.PRODUCER_DOMAIN  +
                         ":type=" + ProducerMetricsTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME +
-                        ",topic=" + topic + ",*";
+                        ",client-id=" + clientId + ",*";
         try {
             Map<String, Set<String>> clientWithTopics = new HashMap<>();
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
             Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
             for (ObjectName objectName : objectNamesFromString) {
-                System.out.println("LOL "+ objectName);
                 String id = objectName.getKeyProperty("client-id");
                 String topicName = objectName.getKeyProperty("topic");
                 Set<String> topicList = clientWithTopics.getOrDefault(id, new HashSet<String>());
@@ -146,10 +168,15 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         }
     }
 
-    public void printObjectNames(Set<String> topics) {
-        for (String topic : topics) {
-            Map<String, Set<String>> topicsPerClient = getTopicsPerClient(topic);
-            System.out.println("HERE::: "+topicsPerClient);
+    public void printObjectNames(Set<String> ids) {
+        for (String id : ids) {
+            Map<String, Set<String>> topicsPerClient = getTopicsPerClient(id);
+//            System.out.println("HERE::: "+topicsPerClient);
+            for (Map.Entry<String, Set<String>> entry :topicsPerClient.entrySet()){
+                for (String topic : entry.getValue()) {
+                    System.out.println("VALUE " + getValue("record-send-rate", entry.getKey(), topic));
+                }
+            }
         }
     }
 
