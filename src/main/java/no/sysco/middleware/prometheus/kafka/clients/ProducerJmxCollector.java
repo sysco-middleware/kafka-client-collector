@@ -5,7 +5,6 @@ import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.internal.MetricNamesUtils;
 import no.sysco.middleware.prometheus.kafka.internal.ProducerMetricNames;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.MetricName;
 
 import javax.management.MBeanServer;
@@ -19,7 +18,7 @@ import java.util.Set;
 public class ProducerJmxCollector extends KafkaClientJmxCollector {
 
     public static String PRODUCER_DOMAIN = "kafka.producer"; // KafkaProducer.JMX_PREFIX
-    public static String PRODUCER_METRIC_TYPE = KafkaProducer.PRODUCER_METRIC_GROUP_NAME;
+    public static String PRODUCER_METRIC_TYPE = "producer-metrics"; // KafkaProducer.PRODUCER_METRIC_GROUP_NAME;
     private final Set<MetricName> producerMetricNames;
 
     private ProducerJmxCollector(MBeanServer mBeanServer, String domainName) {
