@@ -105,7 +105,6 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
                     Arrays.asList(clientId, topic),
                     getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
             );
-            System.out.println("HEREZ: "+gaugeMetricFamily);
             metricFamilySamples.add(gaugeMetricFamily);
         }
         return metricFamilySamples;

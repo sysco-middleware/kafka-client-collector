@@ -49,7 +49,6 @@ public abstract class KafkaClientJmxCollector {
             stringBuilder.append(queryContinue);
         }
         String query = stringBuilder.toString();
-        System.out.println("QUERY:   "+query);
         ObjectName responseObjectName = null;
         try {
             ObjectName mbeanObjectName = new ObjectName(query);
@@ -73,7 +72,6 @@ public abstract class KafkaClientJmxCollector {
 
         Object value;
         try {
-            System.out.println("object name: " + objectName + ", attribute: " + attribute);
             value = mBeanServer.getAttribute(objectName, attribute);
             final Number number;
 
