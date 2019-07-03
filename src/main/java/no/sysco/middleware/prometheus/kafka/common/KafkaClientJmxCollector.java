@@ -129,28 +129,6 @@ public abstract class KafkaClientJmxCollector {
         return metricFamilySamples;
     }
 
-    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
-        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
-        for (MetricName metricName : metricNames) {
-            String clientId = metricName.tags().get("client-id");
-            String topic = metricName.tags().get("topic");
-
-
-            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                    formatMetricName(metricName),
-                    metricName.description(),
-                    Arrays.asList("client-id", "topic")
-            );
-            gaugeMetricFamily.addMetric(
-                    Arrays.asList(clientId, topic),
-                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
-            );
-            System.out.println("HEREZ: "+gaugeMetricFamily);
-            metricFamilySamples.add(gaugeMetricFamily);
-        }
-        return metricFamilySamples;
-    }
-
     //
 //    /**
 //     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
