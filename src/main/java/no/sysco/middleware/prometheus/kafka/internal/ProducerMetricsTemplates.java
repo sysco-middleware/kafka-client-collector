@@ -2,14 +2,34 @@ package no.sysco.middleware.prometheus.kafka.internal;
 
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.MetricNameTemplate;
+import org.apache.kafka.streams.KeyValue;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProducerMetricsTemplates {
 
-    public final static String PRODUCER_DOMAIN = "kafka.producer"; // KafkaProducer.JMX_PREFIX
-    public final static String PRODUCER_METRIC_GROUP_NAME = "producer-metrics"; // KafkaProducer.PRODUCER_METRIC_GROUP_NAME;
+    /**
+     * Value of KafkaProducer.JMX_PREFIX
+     *
+     * Value is mapped to mBean domain
+     * */
+    public final static String PRODUCER_DOMAIN = "kafka.producer"; //
+
+    /**
+     * Value of KafkaProducer.PRODUCER_METRIC_GROUP_NAME
+     *
+     * This type of metrics initialised at startup of application,
+     * when producers have already been initialized
+     * */
+    public final static String PRODUCER_METRIC_GROUP_NAME = "producer-metrics";
+
+    /**
+     * Value of SenderMetricsRegistry.TOPIC_METRIC_GROUP_NAME
+     *
+     * This type of metrics initialised at startup of application,
+     * when producers have already been initialized
+     * */
     public final static String PRODUCER_TOPIC_METRIC_GROUP_NAME = "producer-topic-metrics";
 
     private final List<MetricNameTemplate> allTemplates;
@@ -152,6 +172,7 @@ public class ProducerMetricsTemplates {
         return allTemplates.stream().filter(template -> PRODUCER_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
     }
 
+    // dynamic at runtime
     public Set<MetricNameTemplate> getTopicLevel() {
         return allTemplates.stream().filter(template -> PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
     }
@@ -176,25 +197,26 @@ public class ProducerMetricsTemplates {
         return metricNames;
     }
 
-//    // called on each collect
-//    //todo: refactor
-//    public Set<MetricName> getMetricNamesPerTopic(Map<String, Set<String>> clientIdTopics) {
-//        Set<MetricName> metricNames = new HashSet<>();
-//        for (Map.Entry<String, String> entry : topicClientId.entrySet()) {
-//            for (MetricNameTemplate metricName : getTopicLevel()) {
-//                metricNames.add(
-//                        new MetricName(
-//                                metricName.name(),
-//                                metricName.group(),
-//                                metricName.description(),
-//                                new HashMap<String, String>() {{
-//                                    put("client-id", entry.getValue());
-//                                    put("topic", entry.getKey());
-//                                }}
-//                        )
-//                );
-//            }
-//        }
-//        return metricNames;
-//    }
+    // called on each collect
+    //todo: refactor
+    // create a subset of MetricName per each pair [clientId:topicName]
+    public Set<MetricName> getMetricNamesClientIdTopic(List<KeyValue<String, String>> clientIdTopicList) {
+        Set<MetricName> metricNames = new HashSet<>();
+        for (KeyValue<String, String> clientIdTopic : clientIdTopicList) {
+            for (MetricNameTemplate metricName : getTopicLevel()) {
+                metricNames.add(
+                        new MetricName(
+                                metricName.name(),
+                                metricName.group(),
+                                metricName.description(),
+                                new HashMap<String, String>() {{
+                                    put("client-id", clientIdTopic.key);
+                                    put("topic", clientIdTopic.value);
+                                }}
+                        )
+                );
+            }
+        }
+        return metricNames;
+    }
 }

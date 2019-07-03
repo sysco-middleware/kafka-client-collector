@@ -111,7 +111,7 @@ public abstract class KafkaClientJmxCollector {
         return groupName + "_" + name;
     }
 
-    public List<Collector.MetricFamilySamples> getMetrics(final String metricType, final Set<MetricName> metricNames) {
+    public List<Collector.MetricFamilySamples> getMetricsPerClientId(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -124,6 +124,28 @@ public abstract class KafkaClientJmxCollector {
                     Collections.singletonList(clientId),
                     getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId))
             );
+            metricFamilySamples.add(gaugeMetricFamily);
+        }
+        return metricFamilySamples;
+    }
+
+    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        for (MetricName metricName : metricNames) {
+            String clientId = metricName.tags().get("client-id");
+            String topic = metricName.tags().get("topic");
+
+
+            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                    formatMetricName(metricName),
+                    metricName.description(),
+                    Arrays.asList("client-id", "topic")
+            );
+            gaugeMetricFamily.addMetric(
+                    Arrays.asList(clientId, topic),
+                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
+            );
+            System.out.println("HEREZ: "+gaugeMetricFamily);
             metricFamilySamples.add(gaugeMetricFamily);
         }
         return metricFamilySamples;
