@@ -1,7 +1,7 @@
 package no.sysco.middleware.prometheus.kafka.template;
 
 import no.sysco.middleware.prometheus.kafka.template.common.KafkaClient;
-import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerMetricTemplate;
+import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerMetricTemplates;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.streams.KeyValue;
@@ -9,9 +9,17 @@ import org.apache.kafka.streams.KeyValue;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ProducerMetricsTemplates {
+/**
+ * ProducerMetricTemplates has 2 group of metrics
+ *
+ * 1. `producer-metrics` - common producer sender metrics.
+ * kafka.producer:type=producer-metrics,client-id="{client-id}"
+ * 2. `producer-topic-metrics` - metrics per topic.
+ * kafka.producer:type=producer-topic-metrics,client-id="{client-id}",topic="{topic}"
+ */
+public class ProducerMetricTemplates {
 
-    private final PerBrokerMetricTemplate perBrokerMetricTemplate;
+    private final PerBrokerMetricTemplates perBrokerMetricTemplates;
 
     /**
      * Value of KafkaProducer.JMX_PREFIX
@@ -83,8 +91,8 @@ public class ProducerMetricsTemplates {
     private final Set<String> clientTags; // client-id
     private final Set<String> topicTags; // client-id, topic
 
-    public ProducerMetricsTemplates() {
-        this.perBrokerMetricTemplate = new PerBrokerMetricTemplate(KafkaClient.PRODUCER);
+    public ProducerMetricTemplates() {
+        this.perBrokerMetricTemplates = new PerBrokerMetricTemplates(KafkaClient.PRODUCER);
         this.clientTags = new HashSet<>(Collections.singletonList("client-id"));
         this.topicTags = new HashSet<>(Arrays.asList("client-id", "topic"));
         this.producerMetricsTemplates = new HashSet<>();
@@ -209,6 +217,6 @@ public class ProducerMetricsTemplates {
      * Get a subset of MetricName per pair [clientId:node]
      */
     public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
-        return perBrokerMetricTemplate.getMetricNamesPerBrokerGroup(clientIdNodeSet);
+        return perBrokerMetricTemplates.getMetricNamesPerBrokerGroup(clientIdNodeSet);
     }
 }

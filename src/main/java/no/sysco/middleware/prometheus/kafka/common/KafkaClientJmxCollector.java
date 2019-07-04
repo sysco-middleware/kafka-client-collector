@@ -9,6 +9,8 @@ import javax.management.*;
 import java.util.*;
 
 // todo: doc
+// Domains will look like :
+// [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.producer, java.nio]
 public abstract class KafkaClientJmxCollector {
     protected final MBeanServer mBeanServer;
     protected final String domainName;

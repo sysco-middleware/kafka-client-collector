@@ -3,7 +3,7 @@ package no.sysco.middleware.prometheus.kafka;
 import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
-import no.sysco.middleware.prometheus.kafka.template.ProducerMetricsTemplates;
+import no.sysco.middleware.prometheus.kafka.template.ProducerMetricTemplates;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class ClientsJmxCollector extends Collector {
 
     private final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
-            ProducerMetricsTemplates.PRODUCER_DOMAIN
+            ProducerMetricTemplates.PRODUCER_DOMAIN
     );
 
     private List<KafkaClientJmxCollector> kafkaClientJmxCollectors;
@@ -46,7 +46,7 @@ public class ClientsJmxCollector extends Collector {
         for (Map.Entry<String, Boolean> entry : kafkaDomainFound.entrySet()) {
             if (entry.getValue()){
                 String domain = entry.getKey();
-                if (ProducerMetricsTemplates.PRODUCER_DOMAIN.equals(domain)) {
+                if (ProducerMetricTemplates.PRODUCER_DOMAIN.equals(domain)) {
                     collectors.add(new ProducerJmxCollector());
                 }
             }

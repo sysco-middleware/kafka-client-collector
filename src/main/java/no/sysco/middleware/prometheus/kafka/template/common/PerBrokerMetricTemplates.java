@@ -6,13 +6,19 @@ import org.apache.kafka.streams.KeyValue;
 
 import java.util.*;
 
-// example:  kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
-public class PerBrokerMetricTemplate {
+/**
+ * PerBrokerMetricTemplates has 1 group of metrics, common metrics for all kafka clients.
+ *
+ * `<kafka-client>-node-metrics` - per broker metrics
+ * Example
+ * kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
+ */
+public class PerBrokerMetricTemplates {
     /**
      * Common monitoring metrics for producer/consumer/connect/streams
      * per-broker https://kafka.apache.org/documentation/#common_node_monitoring
      */
-    private final String nodeMetricGroupName;
+    private final String perBrokerMetricGroupName;
     private final Set<MetricNameTemplate> perBrokerMetricTemplates;
 
     private final MetricNameTemplate outgoingByteRate;
@@ -28,8 +34,8 @@ public class PerBrokerMetricTemplate {
     private final MetricNameTemplate responseRate;
     private final MetricNameTemplate responseTotal;
 
-    public PerBrokerMetricTemplate(KafkaClient kafkaCLient) {
-        this.nodeMetricGroupName = kafkaCLient + "-node-metrics";
+    public PerBrokerMetricTemplates(KafkaClient kafkaCLient) {
+        this.perBrokerMetricGroupName = kafkaCLient + "-node-metrics";
         this.perBrokerMetricTemplates = new HashSet<>();
         HashSet<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));
 
@@ -49,12 +55,12 @@ public class PerBrokerMetricTemplate {
     }
 
     private MetricNameTemplate createTemplate(String name, String description, Set<String> tags) {
-        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, nodeMetricGroupName, description, tags);
+        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, perBrokerMetricGroupName, description, tags);
         perBrokerMetricTemplates.add(metricNameTemplate);
         return metricNameTemplate;
     }
 
-    public String getNodeMetricGroupName() { return nodeMetricGroupName; }
+    public String getNodeMetricGroupName() { return perBrokerMetricGroupName; }
 
     /**
      * Get a subset of MetricName per pair [clientId:node]

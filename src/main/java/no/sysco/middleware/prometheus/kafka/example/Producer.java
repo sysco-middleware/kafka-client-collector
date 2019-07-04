@@ -74,7 +74,7 @@ public class Producer {
                         }
                     }
             );
-//            printMetrics(kafkaProducer1.metrics());
+            printMetrics(kafkaProducer1.metrics());
         }
     }
 
