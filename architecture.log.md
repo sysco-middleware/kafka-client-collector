@@ -31,3 +31,18 @@ Producer has 2 metric group :
 * "producer-topic-metrics" - has tags "client-id", "topic". Because of "topic", can be initialize dynamically at run-time.
 
 What is the best way to collect Metrics for second group.   
+
+# 04.07.19
+New iteration of dev process lead me finally to apache kafka docs: https://kafka.apache.org/documentation/#selector_monitoring 
+There are producer metrics groups:
+
+| group                           | clients       | initialised at    |
+| -------------                   |:-------------:|             -----:|
+| `app-info`                      | all           | startup           |
+| `<producer>-node-metrics`       | all           | runtime           |
+| `producer-metrics`              | producer      | startup           |
+| `producer-topic-metrics`        | producer      | runtime           |
+
+
+
+  
