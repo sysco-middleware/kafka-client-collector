@@ -1,4 +1,4 @@
-package no.sysco.middleware.prometheus.kafka.common;
+package no.sysco.middleware.prometheus.kafka;
 
 import io.prometheus.client.Collector;
 import io.prometheus.client.GaugeMetricFamily;

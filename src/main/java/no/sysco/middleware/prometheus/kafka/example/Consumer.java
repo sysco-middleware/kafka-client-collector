@@ -23,7 +23,7 @@ public class Consumer {
         String id1 = UUID.randomUUID().toString();
         String group1 = UUID.randomUUID().toString();
 
-        final String topic = "topic-in";
+        final String topic = "topic-1";
 
         final KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(getConsumerProps(id1, group1));
 

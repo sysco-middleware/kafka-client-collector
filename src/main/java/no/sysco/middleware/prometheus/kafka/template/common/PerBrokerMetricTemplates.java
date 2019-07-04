@@ -7,19 +7,17 @@ import org.apache.kafka.streams.KeyValue;
 import java.util.*;
 
 /**
- * PerBrokerMetricTemplates has 1 group of metrics, common metrics for all kafka clients.
- *
- * `<kafka-client>-node-metrics` - per broker metrics
- * Example
+ * PerBrokerMetricTemplates class has templates for common metrics for kafka clients per broker.
+ * https://kafka.apache.org/documentation/#common_node_monitoring
  * kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
  */
 public class PerBrokerMetricTemplates {
     /**
      * Common monitoring metrics for producer/consumer/connect/streams
-     * per-broker https://kafka.apache.org/documentation/#common_node_monitoring
+     * per-broker
      */
-    private final String perBrokerMetricGroupName;
-    private final Set<MetricNameTemplate> perBrokerMetricTemplates;
+    public final String metricGroupName;
+    public final Set<MetricNameTemplate> templates;
 
     private final MetricNameTemplate outgoingByteRate;
     private final MetricNameTemplate outgoingByteTotal;
@@ -35,9 +33,9 @@ public class PerBrokerMetricTemplates {
     private final MetricNameTemplate responseTotal;
 
     public PerBrokerMetricTemplates(KafkaClient kafkaCLient) {
-        this.perBrokerMetricGroupName = kafkaCLient + "-node-metrics";
-        this.perBrokerMetricTemplates = new HashSet<>();
-        HashSet<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));
+        this.metricGroupName = kafkaCLient + "-node-metrics";
+        this.templates = new HashSet<>();
+        Set<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));
 
         /****** at runtime when client start communicate with node(s) ******/
         this.outgoingByteRate = createTemplate("outgoing-byte-rate", "The number of outgoing bytes per second.", tags);
@@ -55,12 +53,13 @@ public class PerBrokerMetricTemplates {
     }
 
     private MetricNameTemplate createTemplate(String name, String description, Set<String> tags) {
-        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, perBrokerMetricGroupName, description, tags);
-        perBrokerMetricTemplates.add(metricNameTemplate);
+        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, metricGroupName, description, tags);
+        templates.add(metricNameTemplate);
         return metricNameTemplate;
     }
 
-    public String getNodeMetricGroupName() { return perBrokerMetricGroupName; }
+    public String getNodeMetricGroupName() { return metricGroupName; }
+
 
     /**
      * Get a subset of MetricName per pair [clientId:node]
@@ -68,7 +67,7 @@ public class PerBrokerMetricTemplates {
     public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
         Set<MetricName> metricNames = new HashSet<>();
         for (KeyValue<String, String> clientIdTopic : clientIdNodeSet) {
-            for (MetricNameTemplate metricName : perBrokerMetricTemplates) {
+            for (MetricNameTemplate metricName : templates) {
                 metricNames.add(
                         new MetricName(
                                 metricName.name(),

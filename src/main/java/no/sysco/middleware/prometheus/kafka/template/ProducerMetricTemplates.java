@@ -1,5 +1,6 @@
 package no.sysco.middleware.prometheus.kafka.template;
 
+import no.sysco.middleware.prometheus.kafka.template.common.CommonMetricTemplates;
 import no.sysco.middleware.prometheus.kafka.template.common.KafkaClient;
 import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerMetricTemplates;
 import org.apache.kafka.common.MetricName;
@@ -7,7 +8,6 @@ import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.streams.KeyValue;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * ProducerMetricTemplates has 2 group of metrics
@@ -18,40 +18,25 @@ import java.util.stream.Collectors;
  * kafka.producer:type=producer-topic-metrics,client-id="{client-id}",topic="{topic}"
  */
 public class ProducerMetricTemplates {
-
-    private final PerBrokerMetricTemplates perBrokerMetricTemplates;
-
     /**
-     * Value of KafkaProducer.JMX_PREFIX
-     * <p>
-     * Value is mapped to mBean domain
+     * MBean domain.
+     * Value taken from KafkaProducer.JMX_PREFIX
      */
-    public final static String PRODUCER_DOMAIN = "kafka.producer"; //
-
+    public final static String PRODUCER_DOMAIN = "kafka.producer";
     /**
-     * Value of KafkaProducer.PRODUCER_METRIC_GROUP_NAME
-     * <p>
-     * This type of metrics initialised at startup of application,
-     * when producers have already been initialized
-     * <p>
+     * Metric Groups
      * Ref: https://kafka.apache.org/documentation/#selector_monitoring
      */
-    public final static String PRODUCER_METRIC_GROUP_NAME = "producer-metrics";
+    public final static String PRODUCER_METRIC_GROUP_NAME = "producer-metrics"; // KafkaProducer.PRODUCER_METRIC_GROUP_NAME
+    public final static String PRODUCER_TOPIC_METRIC_GROUP_NAME = "producer-topic-metrics"; // SenderMetricsRegistry.TOPIC_METRIC_GROUP_NAME
 
-    /**
-     * Value of SenderMetricsRegistry.TOPIC_METRIC_GROUP_NAME
-     * <p>
-     * This type of metrics initialised at startup of application,
-     * when producers have already been initialized
-     */
-    public final static String PRODUCER_TOPIC_METRIC_GROUP_NAME = "producer-topic-metrics";
-
-    /**
-     * Producer Sender Metrics https://kafka.apache.org/documentation/#producer_sender_monitoring
-     */
-
-    private final Set<MetricNameTemplate> producerMetricsTemplates;
-    private final Set<MetricNameTemplate> producerTopicMetricsTemplates;
+    /** templates */
+    // common templates
+    public final CommonMetricTemplates commonMetricTemplates;
+    public final PerBrokerMetricTemplates perBrokerMetricTemplates;
+    // producer only templates
+    private final Set<MetricNameTemplate> producerInstanceMetricsTemplates; // https://kafka.apache.org/documentation/#producer_sender_monitoring
+    private final Set<MetricNameTemplate> producerTopicMetricsTemplates; //
 
     // per clientId
     private final MetricNameTemplate batchSizeAvg;
@@ -92,11 +77,12 @@ public class ProducerMetricTemplates {
     private final Set<String> topicTags; // client-id, topic
 
     public ProducerMetricTemplates() {
+        this.commonMetricTemplates = new CommonMetricTemplates(KafkaClient.PRODUCER);
         this.perBrokerMetricTemplates = new PerBrokerMetricTemplates(KafkaClient.PRODUCER);
+        this.producerInstanceMetricsTemplates = new HashSet<>();
+        this.producerTopicMetricsTemplates = new HashSet<>();
         this.clientTags = new HashSet<>(Collections.singletonList("client-id"));
         this.topicTags = new HashSet<>(Arrays.asList("client-id", "topic"));
-        this.producerMetricsTemplates = new HashSet<>();
-        this.producerTopicMetricsTemplates = new HashSet<>();
 
         /**
          * Client level
@@ -143,7 +129,7 @@ public class ProducerMetricTemplates {
     private MetricNameTemplate createTemplate(String name, String metricGroupName, String description, Set<String> tags) {
         MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, metricGroupName, description, tags);
         if (PRODUCER_METRIC_GROUP_NAME.equals(metricGroupName)) {
-            producerMetricsTemplates.add(metricNameTemplate);
+            producerInstanceMetricsTemplates.add(metricNameTemplate);
         } else if (PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(metricGroupName)) {
             producerTopicMetricsTemplates.add(metricNameTemplate);
         } else {
@@ -152,26 +138,15 @@ public class ProducerMetricTemplates {
         return metricNameTemplate;
     }
 
-
-    // at startup
-    public Set<MetricNameTemplate> getProducerGroup() {
-        return producerMetricsTemplates.stream().filter(template -> PRODUCER_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
-    }
-
-    // dynamic at runtime
-    public Set<MetricNameTemplate> getProducerTopicGroup() {
-        return producerMetricsTemplates.stream().filter(template -> PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
-    }
-
     /**
      * Get a subset of MetricName per clientId
      *
      * Subset initialised at startup of application
      */
-    public Set<MetricName> getMetricNamesProducerGroup(Set<String> clientIdSet) {
+    public Set<MetricName> getMetricNamesPerClientId(Set<String> clientIdSet, Set<MetricNameTemplate> metricNameTemplates) {
         Set<MetricName> metricNames = new HashSet<>();
         for (String clientId : clientIdSet) {
-            for (MetricNameTemplate metricName : producerMetricsTemplates) {
+            for (MetricNameTemplate metricName : metricNameTemplates) {
                 metricNames.add(
                         new MetricName(
                                 metricName.name(),
@@ -187,6 +162,12 @@ public class ProducerMetricTemplates {
         return metricNames;
     }
 
+    public Set<MetricName> getMetricNamesProducerInstance(Set<String> clientIdSet) {
+        return getMetricNamesPerClientId(clientIdSet, producerInstanceMetricsTemplates);
+    }
+    public Set<MetricName> getMetricNamesCommon(Set<String> clientIdSet) {
+        return getMetricNamesPerClientId(clientIdSet, commonMetricTemplates.templates);
+    }
 
     /**
      * Get a subset of MetricName per pair [clientId:topicName]
