@@ -1,6 +1,6 @@
-package no.sysco.middleware.prometheus.kafka.internal;
+package no.sysco.middleware.prometheus.kafka.template.common;
 
-enum KafkaClient {
+public enum KafkaClient {
     PRODUCER ("producer"),
     CONSUMER ("consumer"),
     CONNECT ("connect"),

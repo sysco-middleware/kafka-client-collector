@@ -1,5 +1,7 @@
-package no.sysco.middleware.prometheus.kafka.internal;
+package no.sysco.middleware.prometheus.kafka.template;
 
+import no.sysco.middleware.prometheus.kafka.template.common.KafkaClient;
+import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerMetricTemplate;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.streams.KeyValue;
@@ -38,11 +40,12 @@ public class ProducerMetricsTemplates {
 
     /**
      * Producer Sender Metrics https://kafka.apache.org/documentation/#producer_sender_monitoring
-     * */
+     */
 
-    private final Set<MetricNameTemplate> templates;
+    private final Set<MetricNameTemplate> producerMetricsTemplates;
+    private final Set<MetricNameTemplate> producerTopicMetricsTemplates;
 
-    // per client
+    // per clientId
     private final MetricNameTemplate batchSizeAvg;
     private final MetricNameTemplate batchSizeMax;
     private final MetricNameTemplate compressionRateAvg;
@@ -66,7 +69,7 @@ public class ProducerMetricsTemplates {
     private final MetricNameTemplate batchSplitRate;
     private final MetricNameTemplate batchSplitTotal;
 
-    // per pair client/topic
+    // per pair { clientId : topic }
     private final MetricNameTemplate topicRecordSendRate;
     private final MetricNameTemplate topicRecordSendTotal;
     private final MetricNameTemplate topicByteRate;
@@ -83,8 +86,9 @@ public class ProducerMetricsTemplates {
     public ProducerMetricsTemplates() {
         this.perBrokerMetricTemplate = new PerBrokerMetricTemplate(KafkaClient.PRODUCER);
         this.clientTags = new HashSet<>(Collections.singletonList("client-id"));
-        this.templates = new HashSet<>();
         this.topicTags = new HashSet<>(Arrays.asList("client-id", "topic"));
+        this.producerMetricsTemplates = new HashSet<>();
+        this.producerTopicMetricsTemplates = new HashSet<>();
 
         /**
          * Client level
@@ -116,7 +120,6 @@ public class ProducerMetricsTemplates {
         /***** Topic level *****/
         /****** at run time when producer start send data ******/
 
-
         // We can't create the MetricName up front for these, because we don't know the topic name yet.
         this.topicRecordSendRate = createTemplate("record-send-rate", PRODUCER_TOPIC_METRIC_GROUP_NAME, "The average number of records sent per second for a topic.", topicTags);
         this.topicRecordSendTotal = createTemplate("record-send-total", PRODUCER_TOPIC_METRIC_GROUP_NAME, "The total number of records sent for a topic.", topicTags);
@@ -131,31 +134,36 @@ public class ProducerMetricsTemplates {
 
     private MetricNameTemplate createTemplate(String name, String metricGroupName, String description, Set<String> tags) {
         MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, metricGroupName, description, tags);
-        templates.add(metricNameTemplate);
+        if (PRODUCER_METRIC_GROUP_NAME.equals(metricGroupName)) {
+            producerMetricsTemplates.add(metricNameTemplate);
+        } else if (PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(metricGroupName)) {
+            producerTopicMetricsTemplates.add(metricNameTemplate);
+        } else {
+            throw new IllegalArgumentException("Unknown metric group " + metricGroupName);
+        }
         return metricNameTemplate;
     }
 
-    public Set<MetricNameTemplate> getAllTemplates() {
-        return templates;
-    }
 
     // at startup
-    public Set<MetricNameTemplate> getClientLevel() {
-        return templates.stream().filter(template -> PRODUCER_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
+    public Set<MetricNameTemplate> getProducerGroup() {
+        return producerMetricsTemplates.stream().filter(template -> PRODUCER_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
     }
 
     // dynamic at runtime
-    public Set<MetricNameTemplate> getTopicLevel() {
-        return templates.stream().filter(template -> PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
+    public Set<MetricNameTemplate> getProducerTopicGroup() {
+        return producerMetricsTemplates.stream().filter(template -> PRODUCER_TOPIC_METRIC_GROUP_NAME.equals(template.group())).collect(Collectors.toSet());
     }
 
     /**
-     * Get a subset of MetricName per pair clientId
+     * Get a subset of MetricName per clientId
+     *
+     * Subset initialised at startup of application
      */
-    public Set<MetricName> getMetricNamesPerClientId(Set<String> clientIds) {
+    public Set<MetricName> getMetricNamesProducerGroup(Set<String> clientIdSet) {
         Set<MetricName> metricNames = new HashSet<>();
-        for (String clientId : clientIds) {
-            for (MetricNameTemplate metricName : getClientLevel()) {
+        for (String clientId : clientIdSet) {
+            for (MetricNameTemplate metricName : producerMetricsTemplates) {
                 metricNames.add(
                         new MetricName(
                                 metricName.name(),
@@ -174,11 +182,13 @@ public class ProducerMetricsTemplates {
 
     /**
      * Get a subset of MetricName per pair [clientId:topicName]
+     *
+     * Subset initialised at runtime, each collect() - metrics is scraped;
      */
-    public Set<MetricName> getMetricNamesClientIdTopic(List<KeyValue<String, String>> clientIdTopicList) {
+    public Set<MetricName> getMetricNamesProducerTopicGroup(Set<KeyValue<String, String>> clientIdTopicSet) {
         Set<MetricName> metricNames = new HashSet<>();
-        for (KeyValue<String, String> clientIdTopic : clientIdTopicList) {
-            for (MetricNameTemplate metricName : getTopicLevel()) {
+        for (KeyValue<String, String> clientIdTopic : clientIdTopicSet) {
+            for (MetricNameTemplate metricName : producerTopicMetricsTemplates) {
                 metricNames.add(
                         new MetricName(
                                 metricName.name(),
@@ -193,5 +203,12 @@ public class ProducerMetricsTemplates {
             }
         }
         return metricNames;
+    }
+
+    /**
+     * Get a subset of MetricName per pair [clientId:node]
+     */
+    public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
+        return perBrokerMetricTemplate.getMetricNamesPerBrokerGroup(clientIdNodeSet);
     }
 }

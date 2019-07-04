@@ -1,13 +1,16 @@
-package no.sysco.middleware.prometheus.kafka.internal;
+package no.sysco.middleware.prometheus.kafka.template.common;
 
+import org.apache.kafka.common.MetricName;
 import org.apache.kafka.common.MetricNameTemplate;
+import org.apache.kafka.streams.KeyValue;
 
 import java.util.*;
 
 // example:  kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
 public class PerBrokerMetricTemplate {
     /**
-     * Common metrics per-broker https://kafka.apache.org/documentation/#common_node_monitoring
+     * Common monitoring metrics for producer/consumer/connect/streams
+     * per-broker https://kafka.apache.org/documentation/#common_node_monitoring
      */
     private final String metricGroupName;
     private final Set<MetricNameTemplate> perBrokerMetricTemplates;
@@ -30,6 +33,7 @@ public class PerBrokerMetricTemplate {
         this.perBrokerMetricTemplates = new HashSet<>();
         HashSet<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));
 
+        /****** at runtime when client start communicate with node(s) ******/
         this.outgoingByteRate = createTemplate("outgoing-byte-rate", "The number of outgoing bytes per second.", tags);
         this.outgoingByteTotal = createTemplate("outgoing-byte-total", "The total number of outgoing bytes sent for a node.", tags);
         this.requestRate = createTemplate("request-rate", "The average number of requests sent per second for a node.", tags);
@@ -50,5 +54,30 @@ public class PerBrokerMetricTemplate {
         return metricNameTemplate;
     }
 
+//    public Set<MetricNameTemplate> getPerBrokerMetricTemplates() {
+//        return perBrokerMetricTemplates;
+//    }
 
+    /**
+     * Get a subset of MetricName per pair [clientId:node]
+     */
+    public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
+        Set<MetricName> metricNames = new HashSet<>();
+        for (KeyValue<String, String> clientIdTopic : clientIdNodeSet) {
+            for (MetricNameTemplate metricName : perBrokerMetricTemplates) {
+                metricNames.add(
+                        new MetricName(
+                                metricName.name(),
+                                metricName.group(),
+                                metricName.description(),
+                                new HashMap<String, String>() {{
+                                    put("client-id", clientIdTopic.key);
+                                    put("node-id", clientIdTopic.value);
+                                }}
+                        )
+                );
+            }
+        }
+        return metricNames;
+    }
 }

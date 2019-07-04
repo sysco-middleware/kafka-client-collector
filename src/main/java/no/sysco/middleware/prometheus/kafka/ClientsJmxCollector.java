@@ -3,7 +3,7 @@ package no.sysco.middleware.prometheus.kafka;
 import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.common.KafkaClientJmxCollector;
-import no.sysco.middleware.prometheus.kafka.internal.ProducerMetricsTemplates;
+import no.sysco.middleware.prometheus.kafka.template.ProducerMetricsTemplates;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
