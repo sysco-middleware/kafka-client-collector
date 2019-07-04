@@ -43,6 +43,8 @@ There are producer metrics groups:
 | `producer-metrics`              | producer      | startup           |
 | `producer-topic-metrics`        | producer      | runtime           |
 
+Naming become a nightmare. 
 
-
+todos:
+* check https://github.com/micrometer-metrics/micrometer 
   
