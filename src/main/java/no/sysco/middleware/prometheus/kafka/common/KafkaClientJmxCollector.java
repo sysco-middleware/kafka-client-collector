@@ -9,7 +9,6 @@ import javax.management.*;
 import java.util.*;
 
 // todo: doc
-// todo: add support for metric group `app-info`
 public abstract class KafkaClientJmxCollector {
     protected final MBeanServer mBeanServer;
     protected final String domainName;
@@ -109,7 +108,7 @@ public abstract class KafkaClientJmxCollector {
         return groupName + "_" + name;
     }
 
-    public List<Collector.MetricFamilySamples> getMetricsPerClientId(final String metricType, final Set<MetricName> metricNames) {
+    public List<Collector.MetricFamilySamples> getMetrics(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -140,6 +139,6 @@ public abstract class KafkaClientJmxCollector {
 //     *                                          |                   |
 //     *  MetricFamilySamples           format(metricName)    metricName.description()
 //     * */
-    public abstract List<Collector.MetricFamilySamples> getMetrics();
+    public abstract List<Collector.MetricFamilySamples> getAllMetrics();
 
 }

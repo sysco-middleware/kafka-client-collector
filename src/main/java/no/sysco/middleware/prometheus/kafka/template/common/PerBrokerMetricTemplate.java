@@ -12,7 +12,7 @@ public class PerBrokerMetricTemplate {
      * Common monitoring metrics for producer/consumer/connect/streams
      * per-broker https://kafka.apache.org/documentation/#common_node_monitoring
      */
-    private final String metricGroupName;
+    private final String nodeMetricGroupName;
     private final Set<MetricNameTemplate> perBrokerMetricTemplates;
 
     private final MetricNameTemplate outgoingByteRate;
@@ -29,7 +29,7 @@ public class PerBrokerMetricTemplate {
     private final MetricNameTemplate responseTotal;
 
     public PerBrokerMetricTemplate(KafkaClient kafkaCLient) {
-        this.metricGroupName = kafkaCLient + "-node-metrics";
+        this.nodeMetricGroupName = kafkaCLient + "-node-metrics";
         this.perBrokerMetricTemplates = new HashSet<>();
         HashSet<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));
 
@@ -49,14 +49,12 @@ public class PerBrokerMetricTemplate {
     }
 
     private MetricNameTemplate createTemplate(String name, String description, Set<String> tags) {
-        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, metricGroupName, description, tags);
+        MetricNameTemplate metricNameTemplate = new MetricNameTemplate(name, nodeMetricGroupName, description, tags);
         perBrokerMetricTemplates.add(metricNameTemplate);
         return metricNameTemplate;
     }
 
-//    public Set<MetricNameTemplate> getPerBrokerMetricTemplates() {
-//        return perBrokerMetricTemplates;
-//    }
+    public String getNodeMetricGroupName() { return nodeMetricGroupName; }
 
     /**
      * Get a subset of MetricName per pair [clientId:node]
