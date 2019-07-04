@@ -47,4 +47,8 @@ Naming become a nightmare.
 
 todos:
 * check https://github.com/micrometer-metrics/micrometer 
+
+Thread-off:
+Make Set<MetricName> init dynamic at runtime or separate some at startup time, some at runtime;
+Benefit is improve performance. 
   

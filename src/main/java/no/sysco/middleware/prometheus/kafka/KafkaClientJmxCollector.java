@@ -100,6 +100,7 @@ public abstract class KafkaClientJmxCollector {
             } else {
                 message = "The requested operation is not supported by the MBean Server ";
             }
+            message+=": "+attribute;
             throw new IllegalArgumentException(message);
         }
     }

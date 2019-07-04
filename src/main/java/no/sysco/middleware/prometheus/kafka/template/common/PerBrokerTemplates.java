@@ -7,15 +7,11 @@ import org.apache.kafka.streams.KeyValue;
 import java.util.*;
 
 /**
- * PerBrokerMetricTemplates class has templates for common metrics for kafka clients per broker.
+ * PerBrokerTemplates class has templates for common metrics for kafka clients per broker.
  * https://kafka.apache.org/documentation/#common_node_monitoring
  * kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
  */
-public class PerBrokerMetricTemplates {
-    /**
-     * Common monitoring metrics for producer/consumer/connect/streams
-     * per-broker
-     */
+public class PerBrokerTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
 
@@ -32,7 +28,7 @@ public class PerBrokerMetricTemplates {
     private final MetricNameTemplate responseRate;
     private final MetricNameTemplate responseTotal;
 
-    public PerBrokerMetricTemplates(KafkaClient kafkaCLient) {
+    public PerBrokerTemplates(KafkaClient kafkaCLient) {
         this.metricGroupName = kafkaCLient + "-node-metrics";
         this.templates = new HashSet<>();
         Set<String> tags = new HashSet<>(Arrays.asList("client-id", "node-id"));

@@ -32,14 +32,15 @@ import java.util.stream.Stream;
 public class ProducerJmxCollector extends KafkaClientJmxCollector {
 
     private final Set<MetricName> producerMetricNames;
-    // templates
     private ProducerMetricTemplates producerMetricTemplates;
 
     private ProducerJmxCollector(MBeanServer mBeanServer, String domainName) {
         super(mBeanServer, domainName);
         this.producerMetricTemplates = new ProducerMetricTemplates();
-        this.producerMetricNames = producerMetricTemplates
-                .getMetricNamesProducerInstance(getKafkaClientIds(ProducerMetricTemplates.PRODUCER_METRIC_GROUP_NAME));
+        Set<String> kafkaClientIds = getKafkaClientIds(ProducerMetricTemplates.PRODUCER_METRIC_GROUP_NAME);
+        Set<MetricName> metricNamesCommon = producerMetricTemplates.getMetricNamesCommon(kafkaClientIds);
+        Set<MetricName> metricNamesProducerInstance = producerMetricTemplates.getMetricNamesProducerInstance(kafkaClientIds);
+        this.producerMetricNames = Stream.of(metricNamesCommon, metricNamesProducerInstance).flatMap(Set::stream).collect(Collectors.toSet());
     }
 
     public ProducerJmxCollector() {
@@ -88,7 +89,7 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     public Set<KeyValue<String, String>> getClientNodeSet(final String clientId) {
         String objectNameWithDomain =
                 ProducerMetricTemplates.PRODUCER_DOMAIN +
-                        ":type=" + producerMetricTemplates.perBrokerMetricTemplates.getNodeMetricGroupName() +
+                        ":type=" + producerMetricTemplates.perBrokerTemplates.getNodeMetricGroupName() +
                         ",client-id=" + clientId + ",*";
         Set<KeyValue<String, String>> clientNodeList = new HashSet<>();
         try {
@@ -161,7 +162,7 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     }
 
     List<Collector.MetricFamilySamples> getMetricsPerBroker() {
-        Set<String> clientIds = getKafkaClientIds(producerMetricTemplates.perBrokerMetricTemplates.getNodeMetricGroupName());
+        Set<String> clientIds = getKafkaClientIds(producerMetricTemplates.perBrokerTemplates.getNodeMetricGroupName());
         Set<KeyValue<String, String>> clientsBrokerSet = new HashSet<>();
         for (String id : clientIds) {
             Set<KeyValue<String, String>> brokersPerClient = getClientNodeSet(id);
@@ -169,7 +170,7 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         }
         Set<MetricName> metricNamePerBrokerSet = producerMetricTemplates.getMetricNamesPerBrokerGroup(clientsBrokerSet);
         List<Collector.MetricFamilySamples> metricsPerBroker =
-                getMetricsPerBroker(producerMetricTemplates.perBrokerMetricTemplates.getNodeMetricGroupName(), metricNamePerBrokerSet);
+                getMetricsPerBroker(producerMetricTemplates.perBrokerTemplates.getNodeMetricGroupName(), metricNamePerBrokerSet);
         return metricsPerBroker;
     }
 

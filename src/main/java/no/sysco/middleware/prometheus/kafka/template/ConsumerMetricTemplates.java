@@ -1,7 +1,7 @@
 package no.sysco.middleware.prometheus.kafka.template;
 
 import no.sysco.middleware.prometheus.kafka.template.common.KafkaClient;
-import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerMetricTemplates;
+import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerTemplates;
 import org.apache.kafka.common.MetricNameTemplate;
 
 import java.util.Collections;
@@ -32,7 +32,7 @@ public class ConsumerMetricTemplates {
 
     /** templates */
     // common templates
-    private final PerBrokerMetricTemplates perBrokerMetricTemplates;
+    private final PerBrokerTemplates perBrokerTemplates;
     // consumer only templates
     private final Set<MetricNameTemplate> consumerMetricsTemplates;
 
@@ -62,7 +62,7 @@ public class ConsumerMetricTemplates {
     private final Set<String> clientTags; // client-id
 
     public ConsumerMetricTemplates() {
-        this.perBrokerMetricTemplates = new PerBrokerMetricTemplates(KafkaClient.CONSUMER);
+        this.perBrokerTemplates = new PerBrokerTemplates(KafkaClient.CONSUMER);
         this.consumerMetricsTemplates = new HashSet<>();
         this.clientTags = new HashSet<>(Collections.singletonList("client-id"));
 

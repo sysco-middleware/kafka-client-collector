@@ -2,17 +2,16 @@ package no.sysco.middleware.prometheus.kafka.template.common;
 
 import org.apache.kafka.common.MetricNameTemplate;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * CommonMetricTemplates class has templates for common metrics of kafka clients
+ * CommonTemplates class has templates for common metrics of kafka clients
  * https://kafka.apache.org/documentation/#selector_monitoring
  * kafka.[producer|consumer|connect]:type=[producer|consumer|connect]-metrics,client-id=([-.\w]+)
  * */
-public class CommonMetricTemplates {
+public class CommonTemplates {
 
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
@@ -40,19 +39,21 @@ public class CommonMetricTemplates {
     private final MetricNameTemplate ioTimeNsAvg;
     private final MetricNameTemplate ioRatio;
     private final MetricNameTemplate connectionCount;
-    private final MetricNameTemplate successfulAuthenticationRate;
-    private final MetricNameTemplate successfulAuthenticationTotal;
-    private final MetricNameTemplate failedAuthenticationRate;
-    private final MetricNameTemplate failedAuthenticationTotal;
-    private final MetricNameTemplate successfulReauthenticationRate;
-    private final MetricNameTemplate successfulReauthenticationTotal;
-    private final MetricNameTemplate reauthenticationLatencyMax;
-    private final MetricNameTemplate reauthenticationLatencyAvg;
-    private final MetricNameTemplate failedReauthenticationRate;
-    private final MetricNameTemplate failedReauthenticationTotal;
-    private final MetricNameTemplate successfulAuthenticationNoReauthTotal;
 
-    public CommonMetricTemplates(KafkaClient kafkaClient) {
+// todo: exist at runtime
+//    private final MetricNameTemplate successfulAuthenticationRate;
+//    private final MetricNameTemplate successfulAuthenticationTotal;
+//    private final MetricNameTemplate failedAuthenticationRate;
+//    private final MetricNameTemplate failedAuthenticationTotal;
+//    private final MetricNameTemplate successfulReauthenticationRate;
+//    private final MetricNameTemplate successfulReauthenticationTotal;
+//    private final MetricNameTemplate reauthenticationLatencyMax;
+//    private final MetricNameTemplate reauthenticationLatencyAvg;
+//    private final MetricNameTemplate failedReauthenticationRate;
+//    private final MetricNameTemplate failedReauthenticationTotal;
+//    private final MetricNameTemplate successfulAuthenticationNoReauthTotal;
+
+    public CommonTemplates(KafkaClient kafkaClient) {
         this.metricGroupName = kafkaClient + "-metrics";
         this.templates = new HashSet<>();
         Set<String> tags = new HashSet<>(Collections.singletonList("client-id"));
@@ -80,17 +81,17 @@ public class CommonMetricTemplates {
         this.ioTimeNsAvg = createTemplate("io-time-ns-avg", "The average length of time for I/O per select call in nanoseconds.", tags);
         this.ioRatio = createTemplate("io-ratio", "The fraction of time the I/O thread spent doing I/O.", tags);
         this.connectionCount = createTemplate("connection-count", "The current number of active connections.", tags);
-        this.successfulAuthenticationRate = createTemplate("successful-authentication-rate", "Connections per second that were successfully authenticated using SASL or SSL.", tags);
-        this.successfulAuthenticationTotal = createTemplate("successful-authentication-total", "Total connections that were successfully authenticated using SASL or SSL.", tags);
-        this.failedAuthenticationRate = createTemplate("failed-authentication-rate", "Connections per second that failed authentication.", tags);
-        this.failedAuthenticationTotal = createTemplate("failed-authentication-total", "Total connections that failed authentication.", tags);
-        this.successfulReauthenticationRate = createTemplate("successful-reauthentication-rate", "Connections per second that were successfully re-authenticated using SASL.", tags);
-        this.successfulReauthenticationTotal = createTemplate("successful-reauthentication-total", "Total connections that were successfully re-authenticated using SASL.", tags);
-        this.reauthenticationLatencyMax = createTemplate("reauthentication-latency-max", "The maximum latency in ms observed due to re-authentication.", tags);
-        this.reauthenticationLatencyAvg = createTemplate("reauthentication-latency-avg", "The average latency in ms observed due to re-authentication.", tags);
-        this.failedReauthenticationRate = createTemplate("failed-reauthentication-rate", "Connections per second that failed re-authentication.", tags);
-        this.failedReauthenticationTotal = createTemplate("failed-reauthentication-total", "Total connections that failed re-authentication.", tags);
-        this.successfulAuthenticationNoReauthTotal = createTemplate("successful-authentication-no-reauth-total", "Total connections that were successfully authenticated by older, pre-2.2.0 SASL clients that do not support re-authentication. May only be non-zero", tags);
+//        this.successfulAuthenticationRate = createTemplate("successful-authentication-rate", "Connections per second that were successfully authenticated using SASL or SSL.", tags);
+//        this.successfulAuthenticationTotal = createTemplate("successful-authentication-total", "Total connections that were successfully authenticated using SASL or SSL.", tags);
+//        this.failedAuthenticationRate = createTemplate("failed-authentication-rate", "Connections per second that failed authentication.", tags);
+//        this.failedAuthenticationTotal = createTemplate("failed-authentication-total", "Total connections that failed authentication.", tags);
+//        this.successfulReauthenticationRate = createTemplate("successful-reauthentication-rate", "Connections per second that were successfully re-authenticated using SASL.", tags);
+//        this.successfulReauthenticationTotal = createTemplate("successful-reauthentication-total", "Total connections that were successfully re-authenticated using SASL.", tags);
+//        this.reauthenticationLatencyMax = createTemplate("reauthentication-latency-max", "The maximum latency in ms observed due to re-authentication.", tags);
+//        this.reauthenticationLatencyAvg = createTemplate("reauthentication-latency-avg", "The average latency in ms observed due to re-authentication.", tags);
+//        this.failedReauthenticationRate = createTemplate("failed-reauthentication-rate", "Connections per second that failed re-authentication.", tags);
+//        this.failedReauthenticationTotal = createTemplate("failed-reauthentication-total", "Total connections that failed re-authentication.", tags);
+//        this.successfulAuthenticationNoReauthTotal = createTemplate("successful-authentication-no-reauth-total", "Total connections that were successfully authenticated by older, pre-2.2.0 SASL clients that do not support re-authentication. May only be non-zero", tags);
     }
 
     private MetricNameTemplate createTemplate(String name, String description, Set<String> tags) {
