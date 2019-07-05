@@ -111,7 +111,7 @@ public abstract class KafkaClientJmxCollector {
         return groupName + "_" + name;
     }
 
-    public List<Collector.MetricFamilySamples> getMetrics(final String metricType, final Set<MetricName> metricNames) {
+    public List<Collector.MetricFamilySamples> getMetricsPerClient(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -123,6 +123,27 @@ public abstract class KafkaClientJmxCollector {
             gaugeMetricFamily.addMetric(
                     Collections.singletonList(clientId),
                     getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId))
+            );
+            metricFamilySamples.add(gaugeMetricFamily);
+        }
+        return metricFamilySamples;
+    }
+
+    @SuppressWarnings("unchecked")
+    // producer-node-metrics
+    public List<Collector.MetricFamilySamples> getMetricsPerBroker(final String metricType, final Set<MetricName> metricNames) {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        for (MetricName metricName : metricNames) {
+            String clientId = metricName.tags().get("client-id");
+            String nodeId = metricName.tags().get("node-id");
+            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                    formatMetricName(metricName),
+                    metricName.description(),
+                    Arrays.asList("client-id", "node-id")
+            );
+            gaugeMetricFamily.addMetric(
+                    Arrays.asList(clientId, nodeId),
+                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("node-id", nodeId))
             );
             metricFamilySamples.add(gaugeMetricFamily);
         }

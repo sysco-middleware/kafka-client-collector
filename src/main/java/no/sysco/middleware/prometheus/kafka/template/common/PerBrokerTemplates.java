@@ -54,9 +54,6 @@ public class PerBrokerTemplates {
         return metricNameTemplate;
     }
 
-    public String getNodeMetricGroupName() { return metricGroupName; }
-
-
     /**
      * Get a subset of MetricName per pair [clientId:node]
      */
