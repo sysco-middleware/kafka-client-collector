@@ -40,7 +40,7 @@ There are producer metrics groups:
 | -------------                   |:-------------:|             -----:|
 | `app-info`                      | all           | startup           |
 | `<producer>-node-metrics`       | all           | runtime           |
-| `producer-metrics`              | producer      | startup           |
+| `producer-metrics`              | producer      | startup + runtime |
 | `producer-topic-metrics`        | producer      | runtime           |
 
 Naming become a nightmare. 
