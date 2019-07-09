@@ -70,6 +70,8 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
     public List<Collector.MetricFamilySamples> getAllMetrics() {
         Set<MetricName> metricNamesCommon = consumerMetricTemplates.getMetricNamesCommon(kafkaClientIds);
         Set<MetricName> metricNamesConsumerGroup = consumerMetricTemplates.getMetricNamesConsumerGroup(kafkaClientIds);
+        Set<MetricName> metricNamesFetchGroup = consumerMetricTemplates.getMetricNamesFetchGroup(kafkaClientIds);
+
         // consumer-metrics (common)
         List<Collector.MetricFamilySamples> metricsCommon =
                 getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_METRIC_GROUP_NAME, metricNamesCommon);
@@ -79,8 +81,12 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
         // consumer-node-metrics
         List<Collector.MetricFamilySamples> metricsPerNode = getMetricsNode();
 
+        // consumer-fetch-manager-metrics (common fetch manager metrics)
+        List<Collector.MetricFamilySamples> metricsFetchGroup =
+                getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_FETCH_METRIC_GROUP_NAME, metricNamesFetchGroup);
+
         return Stream
-                .of(metricsCommon, metricsConsumerGroup, metricsPerNode)
+                .of(metricsCommon, metricsConsumerGroup, metricsPerNode, metricsFetchGroup)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }

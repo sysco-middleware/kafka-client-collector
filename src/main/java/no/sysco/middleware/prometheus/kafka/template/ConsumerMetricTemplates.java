@@ -3,6 +3,7 @@ package no.sysco.middleware.prometheus.kafka.template;
 import no.sysco.middleware.prometheus.kafka.template.common.CommonTemplates;
 import no.sysco.middleware.prometheus.kafka.template.common.KafkaClient;
 import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerTemplates;
+import no.sysco.middleware.prometheus.kafka.template.consumer.ConsumerFetchTemplates;
 import no.sysco.middleware.prometheus.kafka.template.consumer.ConsumerGroupTemplates;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.streams.KeyValue;
@@ -34,12 +35,14 @@ public class ConsumerMetricTemplates extends MetricTemplates {
 
     /** consumer-only templates */
     public final ConsumerGroupTemplates consumerGroupTemplates; // `consumer-coordinator-metrics`
+    public final ConsumerFetchTemplates consumerFetchTemplates; // `consumer-fetch-manager-metrics`
 
 
     public ConsumerMetricTemplates() {
         this.commonTemplates = new CommonTemplates(KafkaClient.CONSUMER);
         this.perBrokerTemplates = new PerBrokerTemplates(KafkaClient.CONSUMER);
         this.consumerGroupTemplates = new ConsumerGroupTemplates();
+        this.consumerFetchTemplates = new ConsumerFetchTemplates();
     }
 
     // single client-id
@@ -49,6 +52,10 @@ public class ConsumerMetricTemplates extends MetricTemplates {
     // single client-id
     public Set<MetricName> getMetricNamesConsumerGroup(Set<String> clientIdSet) {
         return getMetricNamesPerClientId(clientIdSet, consumerGroupTemplates.templates);
+    }
+    // single client-id
+    public Set<MetricName> getMetricNamesFetchGroup(Set<String> clientIdSet) {
+        return getMetricNamesPerClientId(clientIdSet, consumerFetchTemplates.templates);
     }
     // pair
     public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
