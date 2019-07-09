@@ -97,17 +97,14 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
 
     @Override
     public List<Collector.MetricFamilySamples> getAllMetrics() {
-
+        Set<MetricName> metricNamesCommon = consumerMetricTemplates.getMetricNamesCommon(kafkaClientIds);
+        Set<MetricName> metricNamesConsumerGroup = consumerMetricTemplates.getMetricNamesConsumerGroup(kafkaClientIds);
         // common
-        List<Collector.MetricFamilySamples> metricsCommon = getMetricsPerClient(
-                ConsumerMetricTemplates.CONSUMER_METRIC_GROUP_NAME,
-                consumerMetricTemplates.getMetricNamesCommon(kafkaClientIds));
-
+        List<Collector.MetricFamilySamples> metricsCommon =
+                getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_METRIC_GROUP_NAME, metricNamesCommon);
         // consumer group
-        List<Collector.MetricFamilySamples> metricsConsumerGroup = getMetricsPerClient(
-                ConsumerMetricTemplates.CONSUMER_COORDINATOR_METRIC_GROUP_NAME,
-                consumerMetricTemplates.getMetricNamesConsumerGroup(kafkaClientIds));
-
+        List<Collector.MetricFamilySamples> metricsConsumerGroup =
+                getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_COORDINATOR_METRIC_GROUP_NAME,metricNamesConsumerGroup);
         // consumer-node-metrics
         List<Collector.MetricFamilySamples> metricsPerBroker = getMetricsPerBroker();
 
