@@ -54,26 +54,27 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     /**
      * Producer client could write to several topics.
      * Examples:
-     * <p>
      * kafka.producer:type=producer-topic-metrics,client-id=A,topic=my-games-topic
      * kafka.producer:type=producer-topic-metrics,client-id=A,topic=transactions-topic
      * kafka.producer:type=producer-topic-metrics,client-id=A,topic=my-friends-topic
+     *
+     * {A, my-games-topic},{A, transactions-topic},{A, my-friends-topic}
      */
     public Set<KeyValue<String, String>> getClientTopicSet(final String clientId) {
         String objectNameWithDomain =
                 ProducerMetricTemplates.PRODUCER_DOMAIN +
                         ":type=" + ProducerMetricTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME +
                         ",client-id=" + clientId + ",*";
-        Set<KeyValue<String, String>> clientTopicList = new HashSet<>();
+        Set<KeyValue<String, String>> clientTopicSet = new HashSet<>();
         try {
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
             Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
             for (ObjectName objectName : objectNamesFromString) {
                 String id = objectName.getKeyProperty("client-id");
                 String topicName = objectName.getKeyProperty("topic");
-                clientTopicList.add(KeyValue.pair(id, topicName));
+                clientTopicSet.add(KeyValue.pair(id, topicName));
             }
-            return clientTopicList;
+            return clientTopicSet;
         } catch (MalformedObjectNameException mfe) {
             throw new IllegalArgumentException(mfe.getMessage());
         }
@@ -82,10 +83,11 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     /**
      * Producer client could write to several topics.
      * Examples:
-     * <p>
      * kafka.producer:type=producer-topic-metrics,client-id=A,node-id=node--1
      * kafka.producer:type=producer-topic-metrics,client-id=B,node-id=node--2
      * kafka.producer:type=producer-topic-metrics,client-id=A,node-id=node--2
+     *
+     * {A, node--1},{B, node--2},{A, node--2}
      */
     public Set<KeyValue<String, String>> getClientNodeSet(final String clientId) {
         String objectNameWithDomain =
@@ -108,7 +110,6 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    // producer-metrics
     public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
@@ -160,16 +161,18 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
 
     @Override
     public List<Collector.MetricFamilySamples> getAllMetrics() {
-        // producer-metrics
+        // common & producer instance metrics
         List<Collector.MetricFamilySamples> metricsPerProducer =
                 getMetricsPerClient(ProducerMetricTemplates.PRODUCER_METRIC_GROUP_NAME, producerMetricNames);
-        // producer-topic-metrics
-        List<Collector.MetricFamilySamples> metricsPerTopic = getMetricsProducerTopic();
+
         // producer-node-metrics
         List<Collector.MetricFamilySamples> metricsPerBroker = getMetricsPerBroker();
 
+        // producer-topic-metrics
+        List<Collector.MetricFamilySamples> metricsPerTopic = getMetricsProducerTopic();
+
         return Stream
-                .of(metricsPerProducer, metricsPerTopic, metricsPerBroker)
+                .of(metricsPerProducer, metricsPerBroker, metricsPerTopic)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }

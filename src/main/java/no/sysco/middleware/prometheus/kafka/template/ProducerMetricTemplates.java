@@ -6,22 +6,15 @@ import no.sysco.middleware.prometheus.kafka.template.common.PerBrokerTemplates;
 import no.sysco.middleware.prometheus.kafka.template.producer.ProducerInstanceTemplates;
 import no.sysco.middleware.prometheus.kafka.template.producer.ProducerTopicMetricsTemplates;
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.common.MetricNameTemplate;
 import org.apache.kafka.streams.KeyValue;
 
 import java.util.*;
 
 /**
- * ProducerMetricTemplates has 2 group of metrics
- *
+ * ProducerMetricTemplates
  * https://kafka.apache.org/documentation/#producer_monitoring
- *
- * 1. `producer-metrics` - common producer sender metrics.
- * kafka.producer:type=producer-metrics,client-id="{client-id}"
- * 2. `producer-topic-metrics` - metrics per topic.
- * kafka.producer:type=producer-topic-metrics,client-id="{client-id}",topic="{topic}"
  */
-public class ProducerMetricTemplates {
+public class ProducerMetricTemplates extends MetricTemplates {
     /**
      * MBean domain.
      * Value taken from KafkaProducer.JMX_PREFIX
@@ -34,14 +27,13 @@ public class ProducerMetricTemplates {
     public final static String PRODUCER_METRIC_GROUP_NAME = "producer-metrics"; // KafkaProducer.PRODUCER_METRIC_GROUP_NAME
     public final static String PRODUCER_TOPIC_METRIC_GROUP_NAME = "producer-topic-metrics"; // SenderMetricsRegistry.TOPIC_METRIC_GROUP_NAME
 
-    /** templates */
-    // common templates
-    public final CommonTemplates commonTemplates;
-    public final PerBrokerTemplates perBrokerTemplates;
-    // producer only templates
-    public final ProducerInstanceTemplates producerInstanceTemplates;
-    public final ProducerTopicMetricsTemplates producerTopicMetricsTemplates;
+    /** common templates */
+    public final CommonTemplates commonTemplates; // `producer-metrics`
+    public final PerBrokerTemplates perBrokerTemplates; // `producer-node-metrics`
 
+    /** producer only templates */
+    public final ProducerInstanceTemplates producerInstanceTemplates; // `producer-metrics`
+    public final ProducerTopicMetricsTemplates producerTopicMetricsTemplates; // `producer-topic-metrics`
 
     public ProducerMetricTemplates() {
         this.commonTemplates = new CommonTemplates(KafkaClient.PRODUCER);
@@ -50,30 +42,6 @@ public class ProducerMetricTemplates {
         this.producerTopicMetricsTemplates = new ProducerTopicMetricsTemplates();
     }
 
-
-    /**
-     * Get a subset of MetricName per clientId
-     *
-     * Subset initialised at startup of application
-     */
-    public Set<MetricName> getMetricNamesPerClientId(Set<String> clientIdSet, Set<MetricNameTemplate> metricNameTemplates) {
-        Set<MetricName> metricNames = new HashSet<>();
-        for (String clientId : clientIdSet) {
-            for (MetricNameTemplate metricName : metricNameTemplates) {
-                metricNames.add(
-                        new MetricName(
-                                metricName.name(),
-                                metricName.group(),
-                                metricName.description(),
-                                new HashMap<String, String>() {{
-                                    put("client-id", clientId);
-                                }}
-                        )
-                );
-            }
-        }
-        return metricNames;
-    }
 
     // single client-id
     public Set<MetricName> getMetricNamesProducerInstance(Set<String> clientIdSet) {
