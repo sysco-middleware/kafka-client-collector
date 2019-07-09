@@ -50,5 +50,19 @@ todos:
 
 Thread-off:
 Make Set<MetricName> init dynamic at runtime or separate some at startup time, some at runtime;
-Benefit is improve performance. 
+Benefit is performance. 
   
+# 09.07.19
+I decided to initialise all metric names (`Set<MetricName>`) at runtime.
+Sequence:
+```
+// init kafka client:
+// new KafkaStreams(...);
+// new KafkaProducer();
+// new kafkaConsumer();
+// ...
+KafkaClientsJmxExports.initialize();
+application.start();
+``` 
+Kafka clients should be initialised before collecting JMX metrics. 
+Because custom collector will collect kafka-client ids.
