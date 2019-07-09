@@ -37,6 +37,35 @@ public abstract class KafkaClientJmxCollector {
     }
 
     /**
+     * Producer client could write to several topics.
+     * Examples:
+     * kafka.producer:type=producer-topic-metrics,client-id=A,node-id=node--1
+     * kafka.producer:type=producer-topic-metrics,client-id=B,node-id=node--2
+     * kafka.producer:type=producer-topic-metrics,client-id=A,node-id=node--2
+     * <p>
+     * {A, node--1},{B, node--2},{A, node--2}
+     */
+    public Set<KeyValue<String, String>> getClientNodeSet(final String domain,
+                                                          final String metricType,
+                                                          final String clientId) {
+        String objectNameWithDomain =
+                domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
+        Set<KeyValue<String, String>> clientNodeList = new HashSet<>();
+        try {
+            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
+            Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
+            for (ObjectName objectName : objectNamesFromString) {
+                String id = objectName.getKeyProperty("client-id");
+                String nodeId = objectName.getKeyProperty("node-id");
+                clientNodeList.add(KeyValue.pair(id, nodeId));
+            }
+            return clientNodeList;
+        } catch (MalformedObjectNameException mfe) {
+            throw new IllegalArgumentException(mfe.getMessage());
+        }
+    }
+
+    /**
      * standard JMX MBean name in the following format domainName:type=metricType,key1=val1,key2=val2
      * example:
      * String objectNameWithDomain = "kafka.producer" + ":type=" + "producer-metrics" + ",client-id="+clientId;
@@ -130,7 +159,8 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    // producer-node-metrics
+    // <client>-node-metrics
+    //todo: verify, refactor method name
     public List<Collector.MetricFamilySamples> getMetricsPerBroker(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {

@@ -23,9 +23,9 @@ import java.util.stream.Stream;
  * <p>
  * 1. `app-info` - metric group name is going to be deprecated.
  * This metric group does not supported by current implementation.
- * 2. `consumer-metrics` - common producer sender metrics.
- * kafka.consumer:type=consumer-metrics,client-id="{client-id}"
- * 3. `consumer-node-metric` - metrics is per broker. Common metric for all clients.
+ * 2. `consumer-metrics` - common metrics.
+ * kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-metrics,client-id=([-.\w]+)
+ * 3. `consumer-node-metric` - metrics is per broker(per node). Common metric for all clients.
  * kafka.[producer|consumer|connect]:type=[consumer|producer|connect]-node-metrics,client-id=([-.\w]+),node-id=([0-9]+)
  * 4. `consumer-coordinator-metrics` - consumer group metrics
  * kafka.consumer:type=consumer-coordinator-metrics,client-id=([-.\w]+)
@@ -52,64 +52,35 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
         );
     }
 
-    List<Collector.MetricFamilySamples> getMetricsPerBroker() {
+    List<Collector.MetricFamilySamples> getMetricsNode() {
         // consumer-node-metrics
-        String perBrokerMetricGroupName = consumerMetricTemplates.perBrokerTemplates.metricGroupName;
-        Set<String> clientIds = getKafkaClientIds(perBrokerMetricGroupName);
+        String metricType = consumerMetricTemplates.perBrokerTemplates.metricGroupName;
         Set<KeyValue<String, String>> clientsBrokerSet = new HashSet<>();
-        for (String id : clientIds) {
-            Set<KeyValue<String, String>> brokersPerClient = getClientNodeSet(id);
+        for (String id : kafkaClientIds) {
+            Set<KeyValue<String, String>> brokersPerClient = getClientNodeSet(ConsumerMetricTemplates.CONSUMER_DOMAIN, metricType, id);
             clientsBrokerSet.addAll(brokersPerClient);
         }
         Set<MetricName> metricNamePerBrokerSet = consumerMetricTemplates.getMetricNamesPerBrokerGroup(clientsBrokerSet);
-        List<Collector.MetricFamilySamples> metricsPerBroker = getMetricsPerBroker(perBrokerMetricGroupName, metricNamePerBrokerSet);
+        List<Collector.MetricFamilySamples> metricsPerBroker = getMetricsPerBroker(metricType, metricNamePerBrokerSet);
         return metricsPerBroker;
     }
 
-    /**
-     * Producer client could write to several topics.
-     * Examples:
-     * kafka.consumer:type=consumer-topic-metrics,client-id=A,node-id=node--1
-     * kafka.consumer:type=consumer-topic-metrics,client-id=B,node-id=node--2
-     * kafka.consumer:type=consumer-topic-metrics,client-id=A,node-id=node--2
-     *
-     * {A, node--1},{B, node--2},{A, node--2}
-     */
-    public Set<KeyValue<String, String>> getClientNodeSet(final String clientId) {
-        String objectNameWithDomain =
-                ConsumerMetricTemplates.CONSUMER_DOMAIN +
-                        ":type=" + consumerMetricTemplates.perBrokerTemplates.metricGroupName +
-                        ",client-id=" + clientId + ",*";
-        Set<KeyValue<String, String>> clientNodeList = new HashSet<>();
-        try {
-            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
-            Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
-            for (ObjectName objectName : objectNamesFromString) {
-                String id = objectName.getKeyProperty("client-id");
-                String nodeId = objectName.getKeyProperty("node-id");
-                clientNodeList.add(KeyValue.pair(id, nodeId));
-            }
-            return clientNodeList;
-        } catch (MalformedObjectNameException mfe) {
-            throw new IllegalArgumentException(mfe.getMessage());
-        }
-    }
 
     @Override
     public List<Collector.MetricFamilySamples> getAllMetrics() {
         Set<MetricName> metricNamesCommon = consumerMetricTemplates.getMetricNamesCommon(kafkaClientIds);
         Set<MetricName> metricNamesConsumerGroup = consumerMetricTemplates.getMetricNamesConsumerGroup(kafkaClientIds);
-        // common
+        // consumer-metrics (common)
         List<Collector.MetricFamilySamples> metricsCommon =
                 getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_METRIC_GROUP_NAME, metricNamesCommon);
-        // consumer group
+        // consumer-coordinator-metrics (consumer group)
         List<Collector.MetricFamilySamples> metricsConsumerGroup =
                 getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_COORDINATOR_METRIC_GROUP_NAME,metricNamesConsumerGroup);
         // consumer-node-metrics
-        List<Collector.MetricFamilySamples> metricsPerBroker = getMetricsPerBroker();
+        List<Collector.MetricFamilySamples> metricsPerNode = getMetricsNode();
 
         return Stream
-                .of(metricsCommon, metricsConsumerGroup, metricsPerBroker)
+                .of(metricsCommon, metricsConsumerGroup, metricsPerNode)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
