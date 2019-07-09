@@ -29,7 +29,7 @@ public class Consumer {
 
         HTTPServer server = new HTTPServer(8081);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-//        KafkaClientsJmxExports.initialize();
+        KafkaClientsJmxExports.initialize();
 
         kafkaConsumer.subscribe(Collections.singleton(topic));
         while (true) {
@@ -38,7 +38,7 @@ public class Consumer {
                 System.out.println(record.key());
             }
             Thread.sleep(3_000);
-            printMetrics(kafkaConsumer.metrics());
+//            printMetrics(kafkaConsumer.metrics());
         }
     }
 
