@@ -13,7 +13,6 @@ public class ProducerTopicMetricsTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
 
-
     // per pair { clientId : topic }
     private final MetricNameTemplate topicRecordSendRate;
     private final MetricNameTemplate topicRecordSendTotal;
@@ -56,7 +55,7 @@ public class ProducerTopicMetricsTemplates {
      *
      * Subset initialised at runtime, each collect() - metrics is scraped;
      */
-    public Set<MetricName> getMetricNamesProducerTopicGroup(Set<KeyValue<String, String>> clientIdTopicSet) {
+    public Set<MetricName> getMetricNames(Set<KeyValue<String, String>> clientIdTopicSet) {
         Set<MetricName> metricNames = new HashSet<>();
         for (KeyValue<String, String> clientIdTopic : clientIdTopicSet) {
             for (MetricNameTemplate metricName : templates) {

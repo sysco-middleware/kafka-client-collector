@@ -2,17 +2,17 @@ package no.sysco.middleware.prometheus.kafka.clients;
 
 
 import io.prometheus.client.Collector;
-import io.prometheus.client.GaugeMetricFamily;
 import no.sysco.middleware.prometheus.kafka.KafkaClientJmxCollector;
 import no.sysco.middleware.prometheus.kafka.template.ProducerMetricTemplates;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.streams.KeyValue;
 
 import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,67 +46,17 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         );
     }
 
-    /**
-     * Producer client could write to several topics.
-     * Examples:
-     * kafka.producer:type=producer-topic-metrics,client-id=A,topic=my-games-topic
-     * kafka.producer:type=producer-topic-metrics,client-id=A,topic=transactions-topic
-     * kafka.producer:type=producer-topic-metrics,client-id=A,topic=my-friends-topic
-     * <p>
-     * {A, my-games-topic},{A, transactions-topic},{A, my-friends-topic}
-     */
-    public Set<KeyValue<String, String>> getClientTopicSet(final String clientId) {
-        String objectNameWithDomain =
-                ProducerMetricTemplates.PRODUCER_DOMAIN +
-                        ":type=" + ProducerMetricTemplates.PRODUCER_TOPIC_METRIC_GROUP_NAME +
-                        ",client-id=" + clientId + ",*";
-        Set<KeyValue<String, String>> clientTopicSet = new HashSet<>();
-        try {
-            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
-            Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
-            for (ObjectName objectName : objectNamesFromString) {
-                String id = objectName.getKeyProperty("client-id");
-                String topicName = objectName.getKeyProperty("topic");
-                clientTopicSet.add(KeyValue.pair(id, topicName));
-            }
-            return clientTopicSet;
-        } catch (MalformedObjectNameException mfe) {
-            throw new IllegalArgumentException(mfe.getMessage());
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
-        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
-        for (MetricName metricName : metricNames) {
-            String clientId = metricName.tags().get("client-id");
-            String topic = metricName.tags().get("topic");
-            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                    formatMetricName(metricName),
-                    metricName.description(),
-                    Arrays.asList("client-id", "topic")
-            );
-            gaugeMetricFamily.addMetric(
-                    Arrays.asList(clientId, topic),
-                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
-            );
-            metricFamilySamples.add(gaugeMetricFamily);
-        }
-        return metricFamilySamples;
-    }
-
-
     List<Collector.MetricFamilySamples> getMetricsTopic() {
         // producer-topic-metrics
-        String perTopicMetricGroupName = producerMetricTemplates.producerTopicMetricsTemplates.metricGroupName;
+        String metricType = producerMetricTemplates.producerTopicMetricsTemplates.metricGroupName;
         Set<KeyValue<String, String>> clientsTopicsList = new HashSet<>();
         for (String id : kafkaClientIds) {
-            Set<KeyValue<String, String>> topicsPerClient = getClientTopicSet(id);
+            Set<KeyValue<String, String>> topicsPerClient = getClientTopicSet(ProducerMetricTemplates.PRODUCER_DOMAIN, metricType, id);
             clientsTopicsList.addAll(topicsPerClient);
         }
         Set<MetricName> metricsPerClientIdTopic = producerMetricTemplates.getMetricNamesProducerTopicGroup(clientsTopicsList);
-        List<Collector.MetricFamilySamples> metricsDefinedAtRuntime = getMetricsPerClientIdTopic(perTopicMetricGroupName, metricsPerClientIdTopic);
-        return metricsDefinedAtRuntime;
+        List<Collector.MetricFamilySamples> perClientIdTopic = getMetricsPerClientIdTopic(metricType, metricsPerClientIdTopic);
+        return perClientIdTopic;
     }
 
     List<Collector.MetricFamilySamples> getMetricsNode() {
@@ -115,7 +65,7 @@ public class ProducerJmxCollector extends KafkaClientJmxCollector {
         Set<String> clientIds = getKafkaClientIds(metricType);
         Set<KeyValue<String, String>> clientsBrokerSet = new HashSet<>();
         for (String id : clientIds) {
-            Set<KeyValue<String, String>> brokersPerClient = getClientNodeSet(ProducerMetricTemplates.PRODUCER_DOMAIN, metricType ,id);
+            Set<KeyValue<String, String>> brokersPerClient = getClientNodeSet(ProducerMetricTemplates.PRODUCER_DOMAIN, metricType, id);
             clientsBrokerSet.addAll(brokersPerClient);
         }
         Set<MetricName> metricNamePerBrokerSet = producerMetricTemplates.getMetricNamesPerBrokerGroup(clientsBrokerSet);

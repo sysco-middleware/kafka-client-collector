@@ -57,7 +57,7 @@ public class PerBrokerTemplates {
     /**
      * Get a subset of MetricName per pair [clientId:node]
      */
-    public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
+    public Set<MetricName> getMetricNames(Set<KeyValue<String, String>> clientIdNodeSet) {
         Set<MetricName> metricNames = new HashSet<>();
         for (KeyValue<String, String> clientIdTopic : clientIdNodeSet) {
             for (MetricNameTemplate metricName : templates) {

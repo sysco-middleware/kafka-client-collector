@@ -52,6 +52,19 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
         );
     }
 
+    List<Collector.MetricFamilySamples> getMetricsTopic() {
+        // producer-topic-metrics
+        String metricType = consumerMetricTemplates.consumerFetchTopicTemplates.metricGroupName;
+        Set<KeyValue<String, String>> clientsTopicsList = new HashSet<>();
+        for (String id : kafkaClientIds) {
+            Set<KeyValue<String, String>> topicsPerClient = getClientTopicSet(ConsumerMetricTemplates.CONSUMER_DOMAIN, metricType, id);
+            clientsTopicsList.addAll(topicsPerClient);
+        }
+        Set<MetricName> metricsPerClientIdTopic = consumerMetricTemplates.getMetricNamesFetchTopicGroup(clientsTopicsList);
+        List<Collector.MetricFamilySamples> perClientIdTopic = getMetricsPerClientIdTopic(metricType, metricsPerClientIdTopic);
+        return perClientIdTopic;
+    }
+
     List<Collector.MetricFamilySamples> getMetricsNode() {
         // consumer-node-metrics
         String metricType = consumerMetricTemplates.perBrokerTemplates.metricGroupName;
@@ -84,6 +97,9 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
         // consumer-fetch-manager-metrics (common fetch manager metrics)
         List<Collector.MetricFamilySamples> metricsFetchGroup =
                 getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_FETCH_METRIC_GROUP_NAME, metricNamesFetchGroup);
+        // consumer-fetch-manager-metrics (per topic fetch manager metrics)
+//        List<Collector.MetricFamilySamples> metricsPerTopic = getMetricsTopic();
+
 
         return Stream
                 .of(metricsCommon, metricsConsumerGroup, metricsPerNode, metricsFetchGroup)

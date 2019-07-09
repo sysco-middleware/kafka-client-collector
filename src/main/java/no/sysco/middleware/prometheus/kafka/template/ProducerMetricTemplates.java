@@ -51,13 +51,12 @@ public class ProducerMetricTemplates extends MetricTemplates {
     public Set<MetricName> getMetricNamesCommon(Set<String> clientIdSet) {
         return getMetricNamesPerClientId(clientIdSet, commonTemplates.templates);
     }
-
     // pair
     public Set<MetricName> getMetricNamesProducerTopicGroup(Set<KeyValue<String, String>> clientIdTopicSet){
-        return producerTopicMetricsTemplates.getMetricNamesProducerTopicGroup(clientIdTopicSet);
+        return producerTopicMetricsTemplates.getMetricNames(clientIdTopicSet);
     }
     // pair
     public Set<MetricName> getMetricNamesPerBrokerGroup(Set<KeyValue<String, String>> clientIdNodeSet) {
-        return perBrokerTemplates.getMetricNamesPerBrokerGroup(clientIdNodeSet);
+        return perBrokerTemplates.getMetricNames(clientIdNodeSet);
     }
 }

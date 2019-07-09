@@ -9,7 +9,7 @@ import javax.management.*;
 import java.util.*;
 
 // todo: doc
-// Domains will look like :
+// Domains will look smth like :
 // [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.producer, java.nio]
 public abstract class KafkaClientJmxCollector {
     protected final MBeanServer mBeanServer;
@@ -65,6 +65,44 @@ public abstract class KafkaClientJmxCollector {
         }
     }
 
+    public Set<KeyValue<String, String>> getClientTopicSet(final String domain, final String metricType, final String clientId) {
+        String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
+        Set<KeyValue<String, String>> clientTopicSet = new HashSet<>();
+        try {
+            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
+            Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
+            for (ObjectName objectName : objectNamesFromString) {
+                String id = objectName.getKeyProperty("client-id");
+                String topicName = objectName.getKeyProperty("topic");
+                clientTopicSet.add(KeyValue.pair(id, topicName));
+            }
+            return clientTopicSet;
+        } catch (MalformedObjectNameException mfe) {
+            throw new IllegalArgumentException(mfe.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        for (MetricName metricName : metricNames) {
+            String clientId = metricName.tags().get("client-id");
+            String topic = metricName.tags().get("topic");
+            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                    formatMetricName(metricName),
+                    metricName.description(),
+                    Arrays.asList("client-id", "topic")
+            );
+            gaugeMetricFamily.addMetric(
+                    Arrays.asList(clientId, topic),
+                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
+            );
+            metricFamilySamples.add(gaugeMetricFamily);
+        }
+        return metricFamilySamples;
+    }
+
+
     /**
      * standard JMX MBean name in the following format domainName:type=metricType,key1=val1,key2=val2
      * example:
@@ -94,6 +132,7 @@ public abstract class KafkaClientJmxCollector {
 
     @SuppressWarnings("unchecked")
     public Double getMBeanAttributeValue(final String metricType, final String attribute, final KeyValue<String, String>... keyValues) {
+        // todo: validate first that object exist
         ObjectName objectName = getObjectName(metricType, keyValues);
         if (objectName == null) {
             String message = "Requested MBean Object not found";
@@ -102,6 +141,7 @@ public abstract class KafkaClientJmxCollector {
 
         Object value;
         try {
+            // todo: validate that attribute exist
             value = mBeanServer.getAttribute(objectName, attribute);
             final Number number;
 
