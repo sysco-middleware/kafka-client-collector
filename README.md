@@ -28,15 +28,22 @@ Provide availability to expose:
 - kafka clients jmx related metrics ([KafkaClientsJmxExports.initialize();](./src/main/java/no/sysco/middleware/prometheus/kafka/KafkaClientsJmxExports.java))
 - custom metrics (developer's responsibility)
 - resource utilization metrics ([DefaultExports.initialize();](https://github.com/prometheus/client_java/blob/master/simpleclient_hotspot/src/main/java/io/prometheus/client/hotspot/DefaultExports.java))
+
 ## Metrics types
 Metrics with Attributes. [Reference](https://github.com/prometheus/jmx_exporter/pull/305/commits/92a6eb106e84cd441ba9b6123132395738d6acd6)
-
+Name of `metrics group` (prometheus context) or `metric type` (jmx context)
 ### Producer:
-Name of `metrics group` (prometheus context) or `metric type` (jmx context) 
-* `app-info` @deprecated = common clients metrics(startup time)
-* `producer-metrics` = common clients metrics + only producer related metrics(runtime + startup time) 
-* `producer-topic-metrics` =  only producer related metrics (runtime)
-* `producer-node-metrics` = common clients metrics(runtime + startup time)
+* `app-info` @deprecated = common clients metrics
+* `producer-metrics` = common clients metrics + only producer related metrics
+* `producer-topic-metrics` =  only producer related metrics 
+* `producer-node-metrics` = common clients metrics
+
+### Consumer:
+* `app-info` @deprecated = common clients metrics
+* `consumer-metrics` = common clients metrics
+* `consumer-coordinator-metrics` - consumer group metrics
+* `consumer-fetch-manager-metrics` =  fetch-manager metrics + per topic + per partition
+* `consumer-node-metrics` = common clients metrics
 
 ### References
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)

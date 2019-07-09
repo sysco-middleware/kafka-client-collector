@@ -66,3 +66,28 @@ application.start();
 ``` 
 Kafka clients should be initialised before collecting JMX metrics. 
 Because custom collector will collect kafka-client ids.
+
+TODO: create validation mechanism for checking attribute exist.  
+ 
+Example:
+```
+Exception in thread "main" java.lang.IllegalArgumentException: The specified attribute does not exist or cannot be retrieved: reauthentication-latency-max
+	at no.sysco.middleware.prometheus.kafka.KafkaClientJmxCollector.getMBeanAttributeValue(KafkaClientJmxCollector.java:133)
+	at no.sysco.middleware.prometheus.kafka.KafkaClientJmxCollector.getMetricsPerClient(KafkaClientJmxCollector.java:154)
+	at no.sysco.middleware.prometheus.kafka.clients.ConsumerJmxCollector.getAllMetrics(ConsumerJmxCollector.java:77)
+	at no.sysco.middleware.prometheus.kafka.ClientsJmxCollector.lambda$collect$0(ClientsJmxCollector.java:63)
+	at java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:267)
+	at java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1382)
+	at java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:481)
+	at java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:471)
+	at java.util.stream.ReduceOps$ReduceOp.evaluateSequential(ReduceOps.java:708)
+	at java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
+	at java.util.stream.ReferencePipeline.collect(ReferencePipeline.java:499)
+	at no.sysco.middleware.prometheus.kafka.ClientsJmxCollector.collect(ClientsJmxCollector.java:64)
+	at io.prometheus.client.CollectorRegistry.collectorNames(CollectorRegistry.java:100)
+	at io.prometheus.client.CollectorRegistry.register(CollectorRegistry.java:50)
+	at io.prometheus.client.Collector.register(Collector.java:139)
+	at io.prometheus.client.Collector.register(Collector.java:132)
+	at no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports.initialize(KafkaClientsJmxExports.java:8)
+	at no.sysco.middleware.prometheus.kafka.example.Consumer.main(Consumer.java:32)
+```
