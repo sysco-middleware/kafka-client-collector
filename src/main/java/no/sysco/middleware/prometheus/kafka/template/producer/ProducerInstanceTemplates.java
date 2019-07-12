@@ -11,12 +11,13 @@ public class ProducerInstanceTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
 
-// todo: exist at runtime
-//    private final MetricNameTemplate waitingThreads;
-//    private final MetricNameTemplate bufferTotalBytes;
-//    private final MetricNameTemplate bufferAvailableBytes;
-//    private final MetricNameTemplate bufferpoolWaitTime;
+    // exist when producer communicate with cluster
+    private final MetricNameTemplate waitingThreads;
+    private final MetricNameTemplate bufferTotalBytes;
+    private final MetricNameTemplate bufferAvailableBytes;
+    private final MetricNameTemplate bufferpoolWaitTime;
 
+    // exist when producer is initialised
     private final MetricNameTemplate batchSizeAvg;
     private final MetricNameTemplate batchSizeMax;
     private final MetricNameTemplate compressionRateAvg;
@@ -45,10 +46,10 @@ public class ProducerInstanceTemplates {
         this.templates = new HashSet<>();
         Set<String> tags = new HashSet<>(Arrays.asList("client-id"));
 
-//        this.waitingThreads = createTemplate("waiting-threads", "The number of user threads blocked waiting for buffer memory to enqueue their records.", tags);
-//        this.bufferTotalBytes = createTemplate("buffer-total-bytes", "The maximum amount of buffer memory the client can use (whether or not it is currently used).", tags);
-//        this.bufferAvailableBytes = createTemplate("buffer-available-bytes", "The total amount of buffer memory that is not being used (either unallocated or in the free list).", tags);
-//        this.bufferpoolWaitTime = createTemplate("bufferpool-wait-time", "The fraction of time an appender waits for space allocation.", tags);
+        this.waitingThreads = createTemplate("waiting-threads", "The number of user threads blocked waiting for buffer memory to enqueue their records.", tags);
+        this.bufferTotalBytes = createTemplate("buffer-total-bytes", "The maximum amount of buffer memory the client can use (whether or not it is currently used).", tags);
+        this.bufferAvailableBytes = createTemplate("buffer-available-bytes", "The total amount of buffer memory that is not being used (either unallocated or in the free list).", tags);
+        this.bufferpoolWaitTime = createTemplate("bufferpool-wait-time", "The fraction of time an appender waits for space allocation.", tags);
 
         this.batchSizeAvg = createTemplate("batch-size-avg", "The average number of bytes sent per partition per-request.", tags);
         this.batchSizeMax = createTemplate("batch-size-max", "The max number of bytes sent per partition per-request.", tags);

@@ -7,11 +7,13 @@ import org.apache.kafka.streams.KeyValue;
 
 import javax.management.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 // todo: doc
 // Domains will look smth like :
 // [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.producer, java.nio]
 public abstract class KafkaClientJmxCollector {
+    private static final Logger LOGGER = Logger.getLogger(KafkaClientJmxCollector.class.getName());
     protected final MBeanServer mBeanServer;
     protected final String domainName;
 
@@ -88,16 +90,21 @@ public abstract class KafkaClientJmxCollector {
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
             String topic = metricName.tags().get("topic");
-            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                    formatMetricName(metricName),
-                    metricName.description(),
-                    Arrays.asList("client-id", "topic")
-            );
-            gaugeMetricFamily.addMetric(
-                    Arrays.asList(clientId, topic),
-                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
-            );
-            metricFamilySamples.add(gaugeMetricFamily);
+            try {
+                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                        formatMetricName(metricName),
+                        metricName.description(),
+                        Arrays.asList("client-id", "topic")
+                );
+                gaugeMetricFamily.addMetric(
+                        Arrays.asList(clientId, topic),
+                        getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("topic", topic))
+                );
+                metricFamilySamples.add(gaugeMetricFamily);
+            } catch (IllegalArgumentException exc) {
+                // todo: proper logging
+                LOGGER.warning(exc.getMessage());
+            }
         }
         return metricFamilySamples;
     }
@@ -184,16 +191,21 @@ public abstract class KafkaClientJmxCollector {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
-            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                    formatMetricName(metricName),
-                    metricName.description(),
-                    Collections.singletonList("client-id")
-            );
-            gaugeMetricFamily.addMetric(
-                    Collections.singletonList(clientId),
-                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId))
-            );
-            metricFamilySamples.add(gaugeMetricFamily);
+            try {
+                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                        formatMetricName(metricName),
+                        metricName.description(),
+                        Collections.singletonList("client-id")
+                );
+                gaugeMetricFamily.addMetric(
+                        Collections.singletonList(clientId),
+                        getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId))
+                );
+                metricFamilySamples.add(gaugeMetricFamily);
+            } catch (IllegalArgumentException exc) {
+                // todo: proper logging
+                LOGGER.warning(exc.getMessage());
+            }
         }
         return metricFamilySamples;
     }
@@ -206,16 +218,21 @@ public abstract class KafkaClientJmxCollector {
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
             String nodeId = metricName.tags().get("node-id");
-            GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
-                    formatMetricName(metricName),
-                    metricName.description(),
-                    Arrays.asList("client-id", "node-id")
-            );
-            gaugeMetricFamily.addMetric(
-                    Arrays.asList(clientId, nodeId),
-                    getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("node-id", nodeId))
-            );
-            metricFamilySamples.add(gaugeMetricFamily);
+            try {
+                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                        formatMetricName(metricName),
+                        metricName.description(),
+                        Arrays.asList("client-id", "node-id")
+                );
+                gaugeMetricFamily.addMetric(
+                        Arrays.asList(clientId, nodeId),
+                        getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("node-id", nodeId))
+                );
+                metricFamilySamples.add(gaugeMetricFamily);
+            } catch (IllegalArgumentException exc) {
+                // todo: proper logging
+                LOGGER.warning(exc.getMessage());
+            }
         }
         return metricFamilySamples;
     }
