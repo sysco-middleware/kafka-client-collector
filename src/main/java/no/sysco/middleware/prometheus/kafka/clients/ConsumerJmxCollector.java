@@ -98,11 +98,11 @@ public class ConsumerJmxCollector extends KafkaClientJmxCollector {
         List<Collector.MetricFamilySamples> metricsFetchGroup =
                 getMetricsPerClient(ConsumerMetricTemplates.CONSUMER_FETCH_METRIC_GROUP_NAME, metricNamesFetchGroup);
         // consumer-fetch-manager-metrics (per topic fetch manager metrics)
-//        List<Collector.MetricFamilySamples> metricsPerTopic = getMetricsTopic();
+        List<Collector.MetricFamilySamples> metricsPerTopic = getMetricsTopic();
 
 
         return Stream
-                .of(metricsCommon, metricsConsumerGroup, metricsPerNode, metricsFetchGroup)
+                .of(metricsCommon, metricsConsumerGroup, metricsPerNode, metricsFetchGroup, metricsPerTopic)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
