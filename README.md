@@ -45,6 +45,18 @@ Name of `metrics group` (prometheus context) or `metric type` (jmx context)
 * `consumer-fetch-manager-metrics` =  fetch-manager metrics + per topic + per partition
 * `consumer-node-metrics` = common clients metrics
 
+### Stream:
+Stream contains metrics from domains `kafka.producer`, `kafka.consumer`, `kafka.admin.client` and own set of metrics
+such as :
+* `app-info` @deprecated = common clients metrics
+* `stream-metrics` = only stream related metrics [INFO lvl]
+* `stream-task-metrics` = stream task related metrics [DEBUG lvl]
+* `stream-processor-node-metrics` = stream processor related metrics [DEBUG lvl]
+* `stream-[store-scope]-metrics` = stream store related metrics [DEBUG lvl]
+* `stream-record-cache-metrics` = stream record cache related metrics [DEBUG lvl]
+* `stream-buffer-metrics` = stream buffer related metrics [DEBUG lvl]
+
+`NB!`: Metrics has info and debug log level. Current implementation support only `INFO` level 
 ### References
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)
 - [Issue 400: does the client automatically publish jmx mertices (heap size memory, thread number)?](https://github.com/prometheus/client_java/issues/400)

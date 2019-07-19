@@ -100,3 +100,5 @@ TODOs:
 1. Naming consistency
 2. refactoring
 3. Logging
+
+Has an idea, Stream `Metrics` have a different recording levels debug and info. For first release focus only on info level.

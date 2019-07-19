@@ -1,11 +1,7 @@
 package no.sysco.middleware.prometheus.kafka.template;
 
-import no.sysco.middleware.prometheus.kafka.internal.Tuple3;
-import no.sysco.middleware.prometheus.kafka.template.stream.StreamProcessorNodeMetricsTemplate;
-import no.sysco.middleware.prometheus.kafka.template.stream.StreamTaskMetricsTemplates;
 import no.sysco.middleware.prometheus.kafka.template.stream.StreamThreadMetricsTemplates;
 import org.apache.kafka.common.MetricName;
-import org.apache.kafka.streams.KeyValue;
 
 import java.util.Set;
 
@@ -41,30 +37,14 @@ public class StreamMetricTemplates extends MetricTemplates {
      * stream only templates
      */
     public final StreamThreadMetricsTemplates streamThreadMetricsTemplates; // `stream-metrics`
-    public final StreamTaskMetricsTemplates streamTaskMetricsTemplates; // `stream-task-metrics`
-    public final StreamProcessorNodeMetricsTemplate streamProcessorNodeMetricsTemplate; // `stream-processor-node-metrics`
 
     public StreamMetricTemplates() {
         this.streamThreadMetricsTemplates = new StreamThreadMetricsTemplates();
-        this.streamTaskMetricsTemplates = new StreamTaskMetricsTemplates();
-        this.streamProcessorNodeMetricsTemplate = new StreamProcessorNodeMetricsTemplate();
     }
 
     // single client-id
     public Set<MetricName> getMetricNamesStreamThread(Set<String> clientIdSet) {
         return getMetricNamesPerClientId(clientIdSet, streamThreadMetricsTemplates.templates);
     }
-
-    // pair - as a keyValue
-    public Set<MetricName> getMetricNamesStreamTask(Set<KeyValue<String, String>> clientIdTaskSet){
-        return streamTaskMetricsTemplates.getMetricNames(clientIdTaskSet);
-    }
-
-    // pair - as a keyValue
-    public Set<MetricName> getMetricNamesStreamProcessorNode(Set<Tuple3<String, String, String>> clientIdTaskNodeIdSet){
-        return streamProcessorNodeMetricsTemplate.getMetricNames(clientIdTaskNodeIdSet);
-    }
-
-
 
 }
