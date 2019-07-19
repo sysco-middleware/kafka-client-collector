@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+// All the following metrics have a recording level of info:
 // https://kafka.apache.org/documentation/#kafka_streams_thread_monitoring
 public class StreamThreadMetricsTemplates {
     public final String metricGroupName;

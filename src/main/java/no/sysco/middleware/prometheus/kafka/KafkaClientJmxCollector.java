@@ -109,6 +109,51 @@ public abstract class KafkaClientJmxCollector {
         return metricFamilySamples;
     }
 
+    /**
+     * Stream related
+     * */
+    public Set<KeyValue<String, String>> getClientTasksSet(final String domain, final String metricType, final String clientId) {
+        String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
+        Set<KeyValue<String, String>> clientTaskSet = new HashSet<>();
+        try {
+            ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
+            Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
+            for (ObjectName objectName : objectNamesFromString) {
+                String id = objectName.getKeyProperty("client-id");
+                String taskId = objectName.getKeyProperty("task-id");
+                clientTaskSet.add(KeyValue.pair(id, taskId));
+            }
+            return clientTaskSet;
+        } catch (MalformedObjectNameException mfe) {
+            throw new IllegalArgumentException(mfe.getMessage());
+        }
+    }
+    // todo: refactor DRY
+    @SuppressWarnings("unchecked")
+    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTasks(final String metricType, final Set<MetricName> metricNames) {
+        List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
+        for (MetricName metricName : metricNames) {
+            String clientId = metricName.tags().get("client-id");
+            String taskId = metricName.tags().get("task-id");
+            try {
+                GaugeMetricFamily gaugeMetricFamily = new GaugeMetricFamily(
+                        formatMetricName(metricName),
+                        metricName.description(),
+                        Arrays.asList("client-id", "task-id")
+                );
+                gaugeMetricFamily.addMetric(
+                        Arrays.asList(clientId, taskId),
+                        getMBeanAttributeValue(metricType, metricName.name(), KeyValue.pair("client-id", clientId), KeyValue.pair("task-id", taskId))
+                );
+                metricFamilySamples.add(gaugeMetricFamily);
+            } catch (IllegalArgumentException exc) {
+                // todo: proper logging
+                LOGGER.warning(exc.getMessage());
+            }
+        }
+        return metricFamilySamples;
+    }
+
 
     /**
      * standard JMX MBean name in the following format domainName:type=metricType,key1=val1,key2=val2
