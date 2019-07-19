@@ -2,6 +2,7 @@ package no.sysco.middleware.prometheus.kafka.clients;
 
 import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.KafkaClientJmxCollector;
+import no.sysco.middleware.prometheus.kafka.internal.Tuple3;
 import no.sysco.middleware.prometheus.kafka.template.StreamMetricTemplates;
 import org.apache.kafka.common.MetricName;
 import org.apache.kafka.streams.KeyValue;
@@ -43,6 +44,12 @@ public class StreamJmxCollector extends KafkaClientJmxCollector {
         Set<MetricName> metricsPerClientIdTasks = streamMetricTemplates.getMetricNamesStreamTask(clientsTasksList);
         List<Collector.MetricFamilySamples> perClientIdTasks = getMetricsPerClientIdTasks(metricType, metricsPerClientIdTasks);
         return perClientIdTasks;
+    }
+
+    //todo
+    List<Collector.MetricFamilySamples> getMetricsStreamProcessorNode() {
+        // stream-processor-node-metrics
+        return null;
     }
 
     @Override
