@@ -51,7 +51,7 @@ public class Stream {
         System.out.println("HERE: "+domains);
 
         while (state.isRunning()) {
-//            printMetrics(kafkaStreams.metrics());
+            printMetrics(kafkaStreams.metrics());
             Thread.sleep(3000L);
         }
     }

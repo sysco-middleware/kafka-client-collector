@@ -28,7 +28,7 @@ public class Producer {
         final KafkaProducer<String, String> kafkaProducer2 = new KafkaProducer<>(getProducerProps(id2));
 
         DefaultExports.initialize();
-        HTTPServer server = new HTTPServer(8080);
+        HTTPServer server = new HTTPServer(8081);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
 
