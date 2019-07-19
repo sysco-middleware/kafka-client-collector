@@ -91,3 +91,12 @@ Exception in thread "main" java.lang.IllegalArgumentException: The specified att
 	at no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports.initialize(KafkaClientsJmxExports.java:8)
 	at no.sysco.middleware.prometheus.kafka.example.Consumer.main(Consumer.java:32)
 ```
+
+# 12.07.19
+1. Add `try-catch` construct and `log.warn` when call `getMBeanAttributeValue` and log warn any IllegalArgument 
+
+# 19.07.19
+TODOs: 
+1. Naming consistency
+2. refactoring
+3. Logging
