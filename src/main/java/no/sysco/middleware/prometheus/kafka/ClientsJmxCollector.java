@@ -3,8 +3,10 @@ package no.sysco.middleware.prometheus.kafka;
 import io.prometheus.client.Collector;
 import no.sysco.middleware.prometheus.kafka.clients.ConsumerJmxCollector;
 import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
+import no.sysco.middleware.prometheus.kafka.clients.StreamJmxCollector;
 import no.sysco.middleware.prometheus.kafka.template.ConsumerMetricTemplates;
 import no.sysco.middleware.prometheus.kafka.template.ProducerMetricTemplates;
+import no.sysco.middleware.prometheus.kafka.template.StreamMetricTemplates;
 
 import javax.management.MBeanServer;
 import java.lang.management.ManagementFactory;
@@ -16,7 +18,8 @@ public class ClientsJmxCollector extends Collector {
 
     private final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
             ProducerMetricTemplates.PRODUCER_DOMAIN,
-            ConsumerMetricTemplates.CONSUMER_DOMAIN
+            ConsumerMetricTemplates.CONSUMER_DOMAIN,
+            StreamMetricTemplates.STREAM_DOMAIN
     );
 
     private List<KafkaClientJmxCollector> kafkaClientJmxCollectors;
@@ -52,6 +55,8 @@ public class ClientsJmxCollector extends Collector {
                     collectors.add(new ProducerJmxCollector());
                 } else if(ConsumerMetricTemplates.CONSUMER_DOMAIN.equals(domain)) {
                     collectors.add(new ConsumerJmxCollector());
+                } else if (StreamMetricTemplates.STREAM_DOMAIN.equals(domain)) {
+                    collectors.add(new StreamJmxCollector());
                 }
             }
         }

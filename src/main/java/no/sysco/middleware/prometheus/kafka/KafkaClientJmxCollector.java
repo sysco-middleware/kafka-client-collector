@@ -142,7 +142,7 @@ public abstract class KafkaClientJmxCollector {
         // todo: validate first that object exist
         ObjectName objectName = getObjectName(metricType, keyValues);
         if (objectName == null) {
-            String message = "Requested MBean Object not found";
+            String message = String.format("Requested MBean Object not found for [metricType, %s] amd [attribute:value, %s]", metricType, keyValues);
             throw new IllegalArgumentException(message);
         }
 
@@ -204,7 +204,7 @@ public abstract class KafkaClientJmxCollector {
                 metricFamilySamples.add(gaugeMetricFamily);
             } catch (IllegalArgumentException exc) {
                 // todo: proper logging
-                LOGGER.warning(exc.getMessage());
+//                LOGGER.warning(exc.getMessage());
             }
         }
         return metricFamilySamples;
