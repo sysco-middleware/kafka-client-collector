@@ -9,13 +9,10 @@ import javax.management.*;
 import java.util.*;
 import java.util.logging.Logger;
 
-// todo: doc
-// Domains will look smth like :
-// [JMImplementation, java.util.logging, java.lang, com.sun.management, kafka.producer, java.nio]
 public abstract class KafkaClientJmxCollector {
     private static final Logger LOGGER = Logger.getLogger(KafkaClientJmxCollector.class.getName());
-    protected final MBeanServer mBeanServer;
-    protected final String domainName;
+    private final MBeanServer mBeanServer;
+    private final String domainName;
 
     public KafkaClientJmxCollector(MBeanServer mBeanServer, String domainName) {
         this.mBeanServer = mBeanServer;
@@ -47,11 +44,11 @@ public abstract class KafkaClientJmxCollector {
      * <p>
      * {A, node--1},{B, node--2},{A, node--2}
      */
-    public Set<KeyValue<String, String>> getClientNodeSet(final String domain,
-                                                          final String metricType,
-                                                          final String clientId) {
-        String objectNameWithDomain =
-                domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
+    protected Set<KeyValue<String, String>> getClientNodeSet(final String domain,
+                                                             final String metricType,
+                                                             final String clientId) {
+
+        String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
         Set<KeyValue<String, String>> clientNodeList = new HashSet<>();
         try {
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
@@ -67,7 +64,7 @@ public abstract class KafkaClientJmxCollector {
         }
     }
 
-    public Set<KeyValue<String, String>> getClientTopicSet(final String domain, final String metricType, final String clientId) {
+    protected Set<KeyValue<String, String>> getClientTopicSet(final String domain, final String metricType, final String clientId) {
         String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
         Set<KeyValue<String, String>> clientTopicSet = new HashSet<>();
         try {
@@ -85,7 +82,7 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
+    protected List<Collector.MetricFamilySamples> getMetricsPerClientIdTopic(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -102,7 +99,6 @@ public abstract class KafkaClientJmxCollector {
                 );
                 metricFamilySamples.add(gaugeMetricFamily);
             } catch (IllegalArgumentException exc) {
-                // todo: proper logging
                 LOGGER.warning(exc.getMessage());
             }
         }
@@ -111,7 +107,7 @@ public abstract class KafkaClientJmxCollector {
 
     /**
      * Stream related
-     * */
+     */
     public Set<KeyValue<String, String>> getClientTasksSet(final String domain, final String metricType, final String clientId) {
         String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
         Set<KeyValue<String, String>> clientTaskSet = new HashSet<>();
@@ -128,6 +124,7 @@ public abstract class KafkaClientJmxCollector {
             throw new IllegalArgumentException(mfe.getMessage());
         }
     }
+
     // todo: refactor DRY
     @SuppressWarnings("unchecked")
     public List<Collector.MetricFamilySamples> getMetricsPerClientIdTasks(final String metricType, final Set<MetricName> metricNames) {
@@ -147,7 +144,6 @@ public abstract class KafkaClientJmxCollector {
                 );
                 metricFamilySamples.add(gaugeMetricFamily);
             } catch (IllegalArgumentException exc) {
-                // todo: proper logging
                 LOGGER.warning(exc.getMessage());
             }
         }
@@ -183,11 +179,11 @@ public abstract class KafkaClientJmxCollector {
     }
 
     @SuppressWarnings("unchecked")
-    public Double getMBeanAttributeValue(final String metricType, final String attribute, final KeyValue<String, String>... keyValues) {
+    private Double getMBeanAttributeValue(final String metricType, final String attribute, final KeyValue<String, String>... keyValues) {
         // todo: validate first that object exist
         ObjectName objectName = getObjectName(metricType, keyValues);
         if (objectName == null) {
-            String message = String.format("Requested MBean Object not found for [metricType, %s] amd [attribute:value, %s]", metricType, keyValues);
+            String message = String.format("Requested MBean Object not found for [metricType, %s] and [attribute:value, [%s]]", metricType, Arrays.asList(keyValues));
             throw new IllegalArgumentException(message);
         }
 
@@ -221,18 +217,18 @@ public abstract class KafkaClientJmxCollector {
             } else {
                 message = "The requested operation is not supported by the MBean Server ";
             }
-            message+=": "+attribute;
+            message += ": " + attribute;
             throw new IllegalArgumentException(message);
         }
     }
 
-    public String formatMetricName(final MetricName metricName) {
+    private String formatMetricName(final MetricName metricName) {
         String groupName = metricName.group().replace("-", "_");
         String name = metricName.name().replace("-", "_");
         return groupName + "_" + name;
     }
 
-    public List<Collector.MetricFamilySamples> getMetricsPerClient(final String metricType, final Set<MetricName> metricNames) {
+    protected List<Collector.MetricFamilySamples> getMetricsPerClient(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -249,16 +245,14 @@ public abstract class KafkaClientJmxCollector {
                 metricFamilySamples.add(gaugeMetricFamily);
             } catch (IllegalArgumentException exc) {
                 // todo: proper logging
-//                LOGGER.warning(exc.getMessage());
+                LOGGER.warning(exc.getMessage());
             }
         }
         return metricFamilySamples;
     }
 
     @SuppressWarnings("unchecked")
-    // <client>-node-metrics
-    //todo: verify, refactor method name
-    public List<Collector.MetricFamilySamples> getMetricsPerBroker(final String metricType, final Set<MetricName> metricNames) {
+    protected List<Collector.MetricFamilySamples> getMetricsPerBroker(final String metricType, final Set<MetricName> metricNames) {
         List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
         for (MetricName metricName : metricNames) {
             String clientId = metricName.tags().get("client-id");
@@ -282,19 +276,19 @@ public abstract class KafkaClientJmxCollector {
         return metricFamilySamples;
     }
 
-    //
-//    /**
-//     *  JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
-//     *                      |                   |                   |                       |
-//     *                      |                   |                   |                       |
-//     *  BEAN             domain             objectName          objectName              objectName
-//     *                                          |                   |
-//     *                                          |                   |
-//     *  MetricName                      metricName.group()     metricName.name()
-//     *                                          |                   |
-//     *                                          |                   |
-//     *  MetricFamilySamples           format(metricName)    metricName.description()
-//     * */
+
+    /**
+     * JMX         kafka.consumer:type=consumer-metrics,request-size-avg=45,client-id=2c980848-6a12-4718-a473-79c6d195e3e6,
+     * |                   |                   |                       |
+     * |                   |                   |                       |
+     * BEAN             domain             objectName          objectName              objectName
+     * |                   |
+     * |                   |
+     * MetricName                      metricName.group()     metricName.name()
+     * |                   |
+     * |                   |
+     * MetricFamilySamples           format(metricName)    metricName.description()
+     */
     public abstract List<Collector.MetricFamilySamples> getAllMetrics();
 
 }

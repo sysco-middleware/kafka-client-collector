@@ -12,7 +12,6 @@ import java.util.Set;
 public class ProducerTopicMetricsTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
-
     // per pair { clientId : topic }
     private final MetricNameTemplate topicRecordSendRate;
     private final MetricNameTemplate topicRecordSendTotal;
@@ -24,14 +23,10 @@ public class ProducerTopicMetricsTemplates {
     private final MetricNameTemplate topicRecordErrorRate;
     private final MetricNameTemplate topicRecordErrorTotal;
 
-
     public ProducerTopicMetricsTemplates() {
         this.metricGroupName = "producer-topic-metrics";
         this.templates = new HashSet<>();
         Set<String> topicTags = new HashSet<>(Arrays.asList("client-id", "topic"));
-
-        /***** Topic level *****/
-        /****** at run time when producer start send data ******/
 
         // We can't create the MetricName up front for these, because we don't know the topic name yet.
         this.topicRecordSendRate = createTemplate("record-send-rate", "The average number of records sent per second for a topic.", topicTags);
@@ -50,9 +45,10 @@ public class ProducerTopicMetricsTemplates {
         templates.add(metricNameTemplate);
         return metricNameTemplate;
     }
+
     /**
      * Get a subset of MetricName per pair [clientId:topicName]
-     *
+     * <p>
      * Subset initialised at runtime, each collect() - metrics is scraped;
      */
     public Set<MetricName> getMetricNames(Set<KeyValue<String, String>> clientIdTopicSet) {

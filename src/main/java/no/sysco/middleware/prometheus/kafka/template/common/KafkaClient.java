@@ -1,10 +1,10 @@
 package no.sysco.middleware.prometheus.kafka.template.common;
 
 public enum KafkaClient {
-    PRODUCER ("producer"),
-    CONSUMER ("consumer"),
-    CONNECT ("connect"),
-    STREAM ("stream");
+    PRODUCER("producer"),
+    CONSUMER("consumer"),
+    CONNECT("connect"),
+    STREAM("stream");
 
     private final String name;
 
@@ -13,7 +13,6 @@ public enum KafkaClient {
     }
 
     public boolean equalsName(String otherName) {
-        // (otherName == null) check is not needed because name.equals(null) returns false
         return name.equals(otherName);
     }
 

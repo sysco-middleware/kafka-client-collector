@@ -12,7 +12,6 @@ public class StreamThreadMetricsTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
 
-    // exist when stream communicate with cluster
     private final MetricNameTemplate commitLatencyAvg;
     private final MetricNameTemplate commitLatencyMax;
     private final MetricNameTemplate pollLatencyAvg;
@@ -61,7 +60,6 @@ public class StreamThreadMetricsTemplates {
         this.taskClosedTotal = createTemplate("task-closed-total", "The total number of tasks closed.", tags);
         this.skippedRecordsRate = createTemplate("skipped-records-rate", "The average number of skipped records per second.", tags);
         this.skippedRecordsTotal = createTemplate("skipped-records-total", "The total number of skipped records.", tags);
-
 
     }
 

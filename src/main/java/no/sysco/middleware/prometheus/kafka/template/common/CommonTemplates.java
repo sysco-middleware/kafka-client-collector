@@ -10,7 +10,7 @@ import java.util.Set;
  * CommonTemplates class has templates for common metrics of kafka clients
  * https://kafka.apache.org/documentation/#selector_monitoring
  * kafka.[producer|consumer|connect]:type=[producer|consumer|connect]-metrics,client-id=([-.\w]+)
- * */
+ */
 public class CommonTemplates {
 
     public final String metricGroupName;

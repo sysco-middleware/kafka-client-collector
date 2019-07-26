@@ -13,7 +13,6 @@ import java.lang.management.ManagementFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//todo: doc
 public class ClientsJmxCollector extends Collector {
 
     private final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(

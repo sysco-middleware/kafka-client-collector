@@ -11,13 +11,10 @@ public class ProducerInstanceTemplates {
     public final String metricGroupName;
     public final Set<MetricNameTemplate> templates;
 
-    // exist when producer communicate with cluster
     private final MetricNameTemplate waitingThreads;
     private final MetricNameTemplate bufferTotalBytes;
     private final MetricNameTemplate bufferAvailableBytes;
     private final MetricNameTemplate bufferpoolWaitTime;
-
-    // exist when producer is initialised
     private final MetricNameTemplate batchSizeAvg;
     private final MetricNameTemplate batchSizeMax;
     private final MetricNameTemplate compressionRateAvg;
