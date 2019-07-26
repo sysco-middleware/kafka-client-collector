@@ -6,10 +6,13 @@ import no.sysco.middleware.prometheus.kafka.KafkaClientsJmxExports;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.Metric;
 import org.apache.kafka.common.MetricName;
+import org.apache.kafka.common.metrics.KafkaMetric;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
@@ -19,27 +22,38 @@ public class Producer {
 
         String id1 = UUID.randomUUID().toString();
         String id2 = UUID.randomUUID().toString();
-        final String topic = "topic-in";
+        final String topic1 = "topic-1";
+        final String topic2 = "topic-2";
         final KafkaProducer<String, String> kafkaProducer1 = new KafkaProducer<>(getProducerProps(id1));
         final KafkaProducer<String, String> kafkaProducer2 = new KafkaProducer<>(getProducerProps(id2));
 
         DefaultExports.initialize();
-        HTTPServer server = new HTTPServer(8080);
+        HTTPServer server = new HTTPServer(8081);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
 
         Set<MetricName> metrics1 = kafkaProducer1.metrics().keySet();
         Set<MetricName> metrics2 = kafkaProducer2.metrics().keySet();
 
-        KafkaClientsJmxExports.initialize(metrics1, metrics2);
+        KafkaClientsJmxExports.initialize();
 
 
         while(true){
-            Thread.sleep(1_000);
+            Thread.sleep(5_000);
             long now = Instant.now().toEpochMilli();
 
             kafkaProducer1.send(
-                    new ProducerRecord<>(topic, now + " p1", now + " milliseconds"),
+                    new ProducerRecord<>(topic1, now + " p1", now + " milliseconds"),
+                    (metadata, exception)-> {
+                        if (exception==null){
+                            System.out.println("successfully sent");
+                        } else {
+                            System.out.println("fail sent");
+                        }
+                    }
+            );
+            kafkaProducer1.send(
+                    new ProducerRecord<>(topic2, now + " p1", now + " milliseconds"),
                     (metadata, exception)-> {
                         if (exception==null){
                             System.out.println("successfully sent");
@@ -49,8 +63,9 @@ public class Producer {
                     }
             );
 
+            Thread.sleep(5_000);
             kafkaProducer2.send(
-                    new ProducerRecord<>(topic, now + " p2", now + " milliseconds"),
+                    new ProducerRecord<>(topic1, now + " p2", now + " milliseconds"),
                     (metadata, exception)-> {
                         if (exception==null){
                             System.out.println("successfully sent");
@@ -59,6 +74,7 @@ public class Producer {
                         }
                     }
             );
+//            printMetrics(kafkaProducer1.metrics());
         }
     }
 
@@ -69,5 +85,14 @@ public class Producer {
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         return properties;
+    }
+
+    static void printMetrics(Map<MetricName, ? extends Metric> metrics) {
+        for (Map.Entry<MetricName, ? extends Metric> entry : metrics.entrySet()) {
+            System.out.println(entry.getKey());
+            KafkaMetric value = (KafkaMetric) entry.getValue();
+            System.out.println(value.metricValue());
+            System.out.println();
+        }
     }
 }
