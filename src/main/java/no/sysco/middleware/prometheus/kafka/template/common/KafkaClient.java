@@ -8,7 +8,7 @@ public enum KafkaClient {
 
     private final String name;
 
-    private KafkaClient(String s) {
+    KafkaClient(String s) {
         name = s;
     }
 

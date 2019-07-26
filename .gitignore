@@ -10,3 +10,4 @@ target/
 .settings/
 .classpath
 dependency-reduced-pom.xml
+codemr/
