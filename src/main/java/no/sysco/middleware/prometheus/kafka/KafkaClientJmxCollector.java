@@ -56,7 +56,9 @@ public abstract class KafkaClientJmxCollector {
             for (ObjectName objectName : objectNamesFromString) {
                 String id = objectName.getKeyProperty("client-id");
                 String nodeId = objectName.getKeyProperty("node-id");
-                clientNodeList.add(KeyValue.pair(id, nodeId));
+                if (nodeId!=null && id != null){
+                    clientNodeList.add(KeyValue.pair(id, nodeId));
+                }
             }
             return clientNodeList;
         } catch (MalformedObjectNameException mfe) {
@@ -66,14 +68,18 @@ public abstract class KafkaClientJmxCollector {
 
     protected Set<KeyValue<String, String>> getClientTopicSet(final String domain, final String metricType, final String clientId) {
         String objectNameWithDomain = domain + ":type=" + metricType + ",client-id=" + clientId + ",*";
+        System.out.println("HERE query: "+objectNameWithDomain);
         Set<KeyValue<String, String>> clientTopicSet = new HashSet<>();
         try {
             ObjectName mbeanObjectName = new ObjectName(objectNameWithDomain);
             Set<ObjectName> objectNamesFromString = mBeanServer.queryNames(mbeanObjectName, null);
             for (ObjectName objectName : objectNamesFromString) {
+                System.out.println("HERE: "+objectName.getKeyPropertyList());
                 String id = objectName.getKeyProperty("client-id");
                 String topicName = objectName.getKeyProperty("topic");
-                clientTopicSet.add(KeyValue.pair(id, topicName));
+                if (topicName!=null && id != null){
+                    clientTopicSet.add(KeyValue.pair(id, topicName));
+                }
             }
             return clientTopicSet;
         } catch (MalformedObjectNameException mfe) {
@@ -180,7 +186,6 @@ public abstract class KafkaClientJmxCollector {
 
     @SuppressWarnings("unchecked")
     private Double getMBeanAttributeValue(final String metricType, final String attribute, final KeyValue<String, String>... keyValues) {
-        // todo: validate first that object exist
         ObjectName objectName = getObjectName(metricType, keyValues);
         if (objectName == null) {
             String message = String.format("Requested MBean Object not found for [metricType, %s] and [attribute:value, [%s]]", metricType, Arrays.asList(keyValues));
@@ -189,7 +194,6 @@ public abstract class KafkaClientJmxCollector {
 
         Object value;
         try {
-            // todo: validate that attribute exist
             value = mBeanServer.getAttribute(objectName, attribute);
             final Number number;
 
@@ -244,7 +248,6 @@ public abstract class KafkaClientJmxCollector {
                 );
                 metricFamilySamples.add(gaugeMetricFamily);
             } catch (IllegalArgumentException exc) {
-                // todo: proper logging
                 LOGGER.warning(exc.getMessage());
             }
         }
