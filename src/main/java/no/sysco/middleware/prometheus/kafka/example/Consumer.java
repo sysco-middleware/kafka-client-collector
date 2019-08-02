@@ -27,9 +27,10 @@ public class Consumer {
 
         final KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(getConsumerProps(id1, group1));
 
-        HTTPServer server = new HTTPServer(8081);
+        HTTPServer server = new HTTPServer(8082);
         Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
-        KafkaClientsJmxExports.initialize();
+
+        KafkaClientsJmxExports.initialize(kafkaConsumer);
 
         kafkaConsumer.subscribe(Collections.singleton(topic));
         while (true) {
