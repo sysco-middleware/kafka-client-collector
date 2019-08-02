@@ -19,7 +19,7 @@ Import dependency.
 
 Use `KafkaClientsJmxExports` to initialize collectors for kafka-clients JMX metrics to conveniently register them.
 ```java
-KafkaClientsJmxExports.initialize();
+KafkaClientsJmxExports.initialize(kafkaProducer);
 ```
 
 

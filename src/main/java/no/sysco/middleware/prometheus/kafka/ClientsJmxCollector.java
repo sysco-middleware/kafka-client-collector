@@ -1,70 +1,40 @@
 package no.sysco.middleware.prometheus.kafka;
 
 import io.prometheus.client.Collector;
-import no.sysco.middleware.prometheus.kafka.clients.ConsumerJmxCollector;
-import no.sysco.middleware.prometheus.kafka.clients.ProducerJmxCollector;
-import no.sysco.middleware.prometheus.kafka.clients.StreamJmxCollector;
-import no.sysco.middleware.prometheus.kafka.template.ConsumerMetricTemplates;
-import no.sysco.middleware.prometheus.kafka.template.ProducerMetricTemplates;
-import no.sysco.middleware.prometheus.kafka.template.StreamMetricTemplates;
-
-import javax.management.MBeanServer;
-import java.lang.management.ManagementFactory;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
+import no.sysco.middleware.prometheus.kafka.clients.KafkaConsumerMetrics;
+import no.sysco.middleware.prometheus.kafka.clients.KafkaMetrics;
+import no.sysco.middleware.prometheus.kafka.clients.KafkaProducerMetrics;
+import no.sysco.middleware.prometheus.kafka.clients.KafkaStreamMetrics;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.streams.KafkaStreams;
 
 public class ClientsJmxCollector extends Collector {
 
-    private final static List<String> KAFKA_CLIENTS_DOMAINS = Arrays.asList(
-            ProducerMetricTemplates.PRODUCER_DOMAIN,
-            ConsumerMetricTemplates.CONSUMER_DOMAIN,
-            StreamMetricTemplates.STREAM_DOMAIN
-    );
+  private List<KafkaMetrics> clientMetricReporters;
 
-    private List<KafkaClientJmxCollector> kafkaClientJmxCollectors;
-
-    ClientsJmxCollector() {
-        this(ManagementFactory.getPlatformMBeanServer());
+  ClientsJmxCollector(Object... kafkaClients) {
+    this.clientMetricReporters = new ArrayList<>();
+    for (Object client : kafkaClients) {
+      if (client instanceof Producer) {
+        clientMetricReporters.add(new KafkaProducerMetrics((Producer<?, ?>) client));
+      } else if (client instanceof Consumer) {
+        clientMetricReporters.add(new KafkaConsumerMetrics((Consumer<?, ?>) client));
+      } else if (client instanceof KafkaStreams) {
+        clientMetricReporters.add(new KafkaStreamMetrics((KafkaStreams) client));
+      } else {
+        throw new IllegalArgumentException("Unknown client");
+      }
     }
+  }
 
-    private ClientsJmxCollector(MBeanServer mBeanServer) {
-        Map<String, Boolean> kafkaDomainFound = findKafkaDomains(mBeanServer.getDomains());
-        this.kafkaClientJmxCollectors = instantiateCollectors(kafkaDomainFound);
-    }
-
-    private Map<String, Boolean> findKafkaDomains(String[] domains) {
-        Map<String, Boolean> map = new HashMap<>();
-        List<String> beanDomains = Arrays.asList(domains);
-        for (String kafkaDomain : KAFKA_CLIENTS_DOMAINS) {
-            if (beanDomains.contains(kafkaDomain)){
-                map.put(kafkaDomain, true);
-            } else {
-                map.put(kafkaDomain, false);
-            }
-        }
-        return map;
-    }
-
-    private List<KafkaClientJmxCollector> instantiateCollectors(Map<String, Boolean> kafkaDomainFound) {
-        List<KafkaClientJmxCollector> collectors = new ArrayList<>();
-        for (Map.Entry<String, Boolean> entry : kafkaDomainFound.entrySet()) {
-            if (entry.getValue()){
-                String domain = entry.getKey();
-                if (ProducerMetricTemplates.PRODUCER_DOMAIN.equals(domain)) {
-                    collectors.add(new ProducerJmxCollector());
-                } else if(ConsumerMetricTemplates.CONSUMER_DOMAIN.equals(domain)) {
-                    collectors.add(new ConsumerJmxCollector());
-                } else if (StreamMetricTemplates.STREAM_DOMAIN.equals(domain)) {
-                    collectors.add(new StreamJmxCollector());
-                }
-            }
-        }
-        return collectors;
-    }
-
-    public List<MetricFamilySamples> collect() {
-        return kafkaClientJmxCollectors.stream()
-                .flatMap(collector -> collector.getAllMetrics().stream())
-                .collect(Collectors.toList());
-    }
+  @Override
+  public List<MetricFamilySamples> collect() {
+    return clientMetricReporters.stream()
+        .flatMap(collector -> collector.getAllMetrics().stream())
+        .collect(Collectors.toList());
+  }
 }
