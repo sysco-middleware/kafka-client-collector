@@ -1,5 +1,5 @@
 [![Build Status](https://www.travis-ci.org/sysco-middleware/kafka-client-collector.svg?branch=master)](https://www.travis-ci.org/sysco-middleware/kafka-client-collector)
-# Kafka clients JMX collector [WIP]
+# Kafka clients JMX collector
 Kafka clients JMX collector is [Custom collector](https://github.com/prometheus/client_java#custom-collectors), for [prometheus/client_java](https://github.com/prometheus/client_java#custom-collectors).
 
 `Kafka clients JMX collector` does proxy JMX metrics from kafka clients.
