@@ -23,10 +23,9 @@ Use `KafkaClientsJmxExports` to initialize collectors for kafka-clients JMX metr
 KafkaClientsJmxExports.initialize(kafkaProducer);
 ```
 
-
 ## Idea
 Provide availability to expose:
-- kafka clients jmx related metrics ([KafkaClientsJmxExports.initialize();](./src/main/java/no/sysco/middleware/prometheus/kafka/KafkaClientsJmxExports.java))
+- kafka clients jmx related metrics ([KafkaClientsJmxExports.initialize(kafkaClient);](./src/main/java/no/sysco/middleware/prometheus/kafka/KafkaClientsJmxExports.java))
 - custom metrics (developer's responsibility)
 - resource utilization metrics ([DefaultExports.initialize();](https://github.com/prometheus/client_java/blob/master/simpleclient_hotspot/src/main/java/io/prometheus/client/hotspot/DefaultExports.java))
 
@@ -67,7 +66,6 @@ such as :
 * `stream-[store-scope]-metrics` = stream store related metrics [DEBUG lvl]
 * `stream-record-cache-metrics` = stream record cache related metrics [DEBUG lvl]
 * `stream-buffer-metrics` = stream buffer related metrics [DEBUG lvl]
-
 
 ### References
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)
