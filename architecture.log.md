@@ -102,3 +102,9 @@ TODOs:
 3. Logging
 
 Has an idea, Stream `Metrics` have a different recording levels debug and info. For first release focus only on info level.
+
+# 01.08.19
+Change approach to JmxReporter and DI.
+Refs:
+- [micrometer](https://github.com/micrometer-metrics/micrometer/pull/1173)
+- [jeqo micrometer binder for kafka](https://github.com/jeqo/micrometer-binder-kafka)
