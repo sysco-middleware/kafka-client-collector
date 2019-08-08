@@ -224,7 +224,7 @@
         <connection>scm:git:ssh://git@github.com:sysco-middleware/kafka-client-collector.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:sysco-middleware/kafka-client-collector.git
         </developerConnection>
-        <url>https://github.com/sysco-middleware/kafka-client-collector.git</url>
+        <url>https://github.com/sysco-middleware/kafka-client-collector/tree/master</url>
         <tag>HEAD</tag>
     </scm>
 
