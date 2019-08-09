@@ -5,7 +5,7 @@
 Kafka client collector is an implementation of [Prometheus custom collector](https://github.com/prometheus/client_java#custom-collectors), 
 for collecting JMX metrics from kafka clients.
 
-## Usage
+## Usage 
 ```xml
 <dependency>
     <groupId>no.sysco.middleware.prometheus</groupId>
@@ -14,6 +14,7 @@ for collecting JMX metrics from kafka clients.
 </dependency>
 ```
 
+### Prometheus http server
 Use `KafkaClientsJmxExports` to initialize collectors for kafka client's JMX metrics to conveniently register them.
 ```java
 HTTPServer server = new HTTPServer(8081);
@@ -21,6 +22,31 @@ Runtime.getRuntime().addShutdownHook(new Thread(server::stop));
 
 KafkaClientsJmxExports.initialize(kafkaProducer1);
 ```
+
+### Armeria http server
+Add armeria dependency, than 
+```java
+/** init health-check, config, metrics */
+final CollectorRegistry collectorRegistry = CollectorRegistry.defaultRegistry;
+new ClientsJmxCollector(kafkaProducer).register(collectorRegistry);
+
+Server server = new ServerBuilder().http(8085)
+    .service("/", (ctx, req) -> HttpResponse.of("OK"))
+    .service("/config", (ctx, req) -> HttpResponse.of(appConfig.properties.toString()))
+    .service("/metrics", (ctx, req) -> {
+      final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      try (OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+        TextFormat.write004(writer, collectorRegistry.metricFamilySamples());
+      }
+      return HttpResponse.of(HttpStatus.OK, CONTENT_TYPE_004, stream.toByteArray());
+    })
+    .build();
+CompletableFuture<Void> future = server.start();
+// Wait until the server is ready.
+future.join();
+```
+
+Follow [full example](https://github.com/sysco-middleware/kafka-client-collector-examples/blob/master/src/main/java/no/sysco/middleware/prometheus/kafka/armeria/Application.java)
 ## Metric format
 ```
 JMX example
