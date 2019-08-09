@@ -108,3 +108,7 @@ Change approach to JmxReporter and DI.
 Refs:
 - [micrometer](https://github.com/micrometer-metrics/micrometer/pull/1173)
 - [jeqo micrometer binder for kafka](https://github.com/jeqo/micrometer-binder-kafka)
+
+# 09.08.2019
+Add opportunity to use different http servers
+ 
