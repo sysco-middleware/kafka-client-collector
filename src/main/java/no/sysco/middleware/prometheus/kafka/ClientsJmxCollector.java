@@ -16,7 +16,7 @@ public class ClientsJmxCollector extends Collector {
 
   private List<KafkaMetrics> clientMetricReporters;
 
-  ClientsJmxCollector(Object... kafkaClients) {
+  public ClientsJmxCollector(Object... kafkaClients) {
     this.clientMetricReporters = new ArrayList<>();
     for (Object client : kafkaClients) {
       if (client instanceof Producer) {

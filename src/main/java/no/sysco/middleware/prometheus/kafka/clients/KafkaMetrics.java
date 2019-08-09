@@ -39,7 +39,7 @@ public abstract class KafkaMetrics {
                 counterMetricFamily.addMetric(tagValues, value);
                 metricFamilySamples.add(counterMetricFamily);
               } else {
-                // System.out.println("NOT A COUNTER");
+                // not counter
               }
             } else {
               double value;
@@ -51,7 +51,7 @@ public abstract class KafkaMetrics {
                 gaugeMetricFamily.addMetric(tagValues, value);
                 metricFamilySamples.add(gaugeMetricFamily);
               } else {
-                // System.out.println("NOT A GAUGE");
+                // not a gauge
               }
             }
           }
