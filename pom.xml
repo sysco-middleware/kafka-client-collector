@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>no.sysco.middleware.prometheus</groupId>
     <artifactId>kafka-client-collector</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
+
+    <name>kafka-client-collector</name>
+    <description>Custom Kafka client JMX collector for prometheus</description>
+    <url>http://github.com/sysco-middleware/kafka-client-collector</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -221,10 +223,10 @@
     </profiles>
 
     <scm>
-        <connection>scm:git:ssh://git@github.com:sysco-middleware/kafka-client-collector.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com:sysco-middleware/kafka-client-collector.git
+        <connection>scm:git:ssh://git@github.com/sysco-middleware/kafka-client-collector.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/sysco-middleware/kafka-client-collector.git
         </developerConnection>
-        <url>https://github.com/sysco-middleware/kafka-client-collector.git</url>
+        <url>http://github.com/sysco-middleware/kafka-client-collector/tree/master</url>
         <tag>HEAD</tag>
     </scm>
 
