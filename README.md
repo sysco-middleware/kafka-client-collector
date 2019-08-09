@@ -10,7 +10,7 @@ for collecting JMX metrics from kafka clients.
 <dependency>
     <groupId>no.sysco.middleware.prometheus</groupId>
     <artifactId>kafka-client-collector</artifactId>
-    <version>0.0.2</version>
+    <version>0.0.3</version>
 </dependency>
 ```
 
