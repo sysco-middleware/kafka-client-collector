@@ -87,26 +87,21 @@ public abstract class KafkaMetrics {
   }
 
   private Boolean filterBadMetrics(final KafkaMetric kafkaMetric) {
-
-    if (kafkaMetric.metricName().name().equals("request-latency-avg")) {
-      System.out.println("Description request-latency-avg :> " + kafkaMetric.metricName().description() + " > " + kafkaMetric.metricName().tags().values());
-    }
-
+    // some metrics has no description
     if (kafkaMetric.metricName().description().isEmpty()) {
-      System.out.println("Description EMPTY :> " + kafkaMetric.metricName().name() + " > " + kafkaMetric.metricName().tags().values());
       return false;
     }
-
     // append fail https://github.com/sysco-middleware/kafka-client-collector/issues/12
+    // kafka node metrics repeats same set twice for `node-id="node-1"` and `node-id="node--1"`
+    // todo: investigate
     if (kafkaMetric.metricName().tags().values().stream().anyMatch((tagValue -> tagValue.contains("--")))) {
       return false;
     }
     // The app-info mbean registered with JMX to provide version and commit id will be deprecated and replaced with metrics providing these attributes.
-    if ("app-info".equalsIgnoreCase(kafkaMetric.metricName().group()) || "kafka-metrics-count".equalsIgnoreCase(kafkaMetric.metricName().group())) {
+    if ("app-info".equalsIgnoreCase(kafkaMetric.metricName().group()) ||
+            "kafka-metrics-count".equalsIgnoreCase(kafkaMetric.metricName().group())) {
       return false;
     }
-
-
     return true;
   }
 
