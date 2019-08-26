@@ -25,7 +25,7 @@ public class KafkaConsumerMetricsTest {
           metrics.getAllMetrics().stream()
               .anyMatch(
                   metricFamilySamples ->
-                      "consumer_metrics_request_size_max".equals(metricFamilySamples.name)));
+                      "consumer_metrics_iotime_total".equals(metricFamilySamples.name)));
     } catch (Exception e) {
       fail();
     }

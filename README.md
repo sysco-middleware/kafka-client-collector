@@ -80,6 +80,11 @@ such as :
 * `stream-record-cache-metrics` [DEBUG lvl]
 * `stream-buffer-metrics` [DEBUG lvl]
 
+### Prometheus metrics format
+1. Check 
+Read [blog post](https://www.robustperception.io/invalid-is-not-a-valid-start-token-and-other-scrape-errors).
+There is a tool `promtool` to verify metrics formatting.
+  
 ### References
 - [More examples](https://github.com/sysco-middleware/kafka-client-collector-examples)
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)
