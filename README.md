@@ -6,7 +6,7 @@ Kafka client collector is an implementation of [Prometheus custom collector](htt
 for collecting JMX metrics from kafka clients.
 
 | Version        | Kafka-client version           | Prometheus simpleclient version |
-|:------------- |:-------------:| -----:|
+|:-------------:|:-------------:|:-----:|
 | 0.0.3      | 2.1.1 | 0.6.0 |
 | 0.0.4      | 2.3.0 | 0.6.0 |
 ## Usage 
@@ -14,7 +14,7 @@ for collecting JMX metrics from kafka clients.
 <dependency>
     <groupId>no.sysco.middleware.prometheus</groupId>
     <artifactId>kafka-client-collector</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4</version>
 </dependency>
 ```
 
@@ -57,9 +57,10 @@ JMX example
 kafka.producer:type=producer-metrics,client-id="dasf-gdfgd-dfgd-31",waiting-threads="5"
 
 Will be exposed as
-producer_metrics_waiting_threads {cliend-id="dasf-gdfgd-dfgd-31"} 5.0
+producer_metrics_waiting_threads {cliend_id="dasf-gdfgd-dfgd-31"} 5.0
 ```
-JMX domain (kafka.producer - example above) is not present in Prometheus format.
+JMX domain (kafka.producer - example above) is not present in Prometheus format, due to kafka-streams api 
+use others apis (kafka-producer, kafka-consumer, kafka-admin-client) and domain names are not presented in KafkaMetric.
 
 ## Metrics types (group) 
 ### Producer:
