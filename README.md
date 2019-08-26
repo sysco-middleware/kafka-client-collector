@@ -5,6 +5,10 @@
 Kafka client collector is an implementation of [Prometheus custom collector](https://github.com/prometheus/client_java#custom-collectors), 
 for collecting JMX metrics from kafka clients.
 
+| Version        | Kafka-client version           | Prometheus simpleclient version |
+|:------------- |:-------------:| -----:|
+| 0.0.3      | 2.1.1 | 0.6.0 |
+| 0.0.4      | 2.3.0 | 0.6.0 |
 ## Usage 
 ```xml
 <dependency>
@@ -80,6 +84,11 @@ such as :
 * `stream-record-cache-metrics` [DEBUG lvl]
 * `stream-buffer-metrics` [DEBUG lvl]
 
+### Prometheus metrics format
+1. Check 
+Read [blog post](https://www.robustperception.io/invalid-is-not-a-valid-start-token-and-other-scrape-errors).
+There is a tool `promtool` to verify metrics formatting.
+  
 ### References
 - [More examples](https://github.com/sysco-middleware/kafka-client-collector-examples)
 - [Issue 305: Add kafka client example config](https://github.com/prometheus/jmx_exporter/pull/305#issuecomment-412851484)
