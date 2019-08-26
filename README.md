@@ -5,6 +5,10 @@
 Kafka client collector is an implementation of [Prometheus custom collector](https://github.com/prometheus/client_java#custom-collectors), 
 for collecting JMX metrics from kafka clients.
 
+| Version        | Kafka-client version           | Prometheus simpleclient version |
+|:------------- |:-------------:| -----:|
+| 0.0.3      | 2.1.1 | 0.6.0 |
+| 0.0.4      | 2.3.0 | 0.6.0 |
 ## Usage 
 ```xml
 <dependency>
