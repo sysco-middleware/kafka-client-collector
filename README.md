@@ -101,3 +101,7 @@ There is a tool `promtool` to verify metrics formatting.
     - [kafka-prometheus-metric-reporter](https://github.com/ripa1993/kafka-prometheus-metric-reporter)
     - [kafka-client-monitoring-poc](https://github.com/sysco-middleware/kafka-client-monitoring-poc)
 - [Micrometer [PR WIP]](https://github.com/micrometer-metrics/micrometer/pull/1173/files)
+
+### Issues 
+- [KIP-488: Clean up Sum,Count,Total Metrics](https://cwiki.apache.org/confluence/display/KAFKA/KIP-488%3A+Clean+up+Sum%2CCount%2CTotal+Metrics)
+- [KIP-444: Augment metrics for Kafka Streams](https://cwiki.apache.org/confluence/display/KAFKA/KIP-444%3A+Augment+metrics+for+Kafka+Streams)
