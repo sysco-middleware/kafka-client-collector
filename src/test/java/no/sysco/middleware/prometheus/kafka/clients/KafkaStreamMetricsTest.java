@@ -20,10 +20,10 @@ public class KafkaStreamMetricsTest {
     KafkaStreamMetrics metrics = new KafkaStreamMetrics(streams);
     assertTrue(
         metrics.getAllMetrics().stream()
-            // producer api under the hood
+            // consumer api under the hood
             .anyMatch(
                 metricFamilySamples ->
-                    "producer_metrics_batch_size_avg".equals(metricFamilySamples.name)));
+                    "consumer_metrics_iotime_total".equals(metricFamilySamples.name)));
   }
 
   private KafkaStreams createStreamApp(String id) {

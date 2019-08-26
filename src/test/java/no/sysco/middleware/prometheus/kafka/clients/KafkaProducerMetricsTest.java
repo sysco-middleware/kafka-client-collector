@@ -24,7 +24,7 @@ public class KafkaProducerMetricsTest {
           metrics.getAllMetrics().stream()
               .anyMatch(
                   metricFamilySamples ->
-                      "producer_metrics_batch_size_avg".equals(metricFamilySamples.name)));
+                      "producer_metrics_network_io_total".equals(metricFamilySamples.name)));
     } catch (Exception e) {
       fail();
     }
