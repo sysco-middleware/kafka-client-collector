@@ -4,6 +4,7 @@ import io.prometheus.client.Collector;
 import io.prometheus.client.CounterMetricFamily;
 import io.prometheus.client.GaugeMetricFamily;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -22,13 +23,14 @@ public abstract class KafkaMetrics {
   }
 
   public List<Collector.MetricFamilySamples> getAllMetrics() {
-    List<Collector.MetricFamilySamples> metricFamilySamples = new ArrayList<>();
     Map<MetricName, ? extends Metric> metrics = metricsSupplier.get();
+    Map<String, Collector.MetricFamilySamples> prometheusFotmattingMetrics = new HashMap<>();
 
     metrics.forEach(
         (metricName, metric) -> {
           if (metric instanceof KafkaMetric) {
             KafkaMetric kafkaMetric = (KafkaMetric) metric;
+            String metricNamePrometheus = metricName(kafkaMetric);
             final List<String> tagsKeys = metric.metricName().tags().keySet().stream().map(this::metricTag).collect(Collectors.toList());
             final List<String> tagValues = new ArrayList<>(metric.metricName().tags().values());
 
@@ -37,11 +39,20 @@ public abstract class KafkaMetrics {
                 double value;
                 if (metric.metricValue() instanceof Double) {
                   value = (double) metric.metricValue();
-                  CounterMetricFamily counterMetricFamily =
-                          new CounterMetricFamily(
-                                  metricName(kafkaMetric), kafkaMetric.metricName().description(), tagsKeys);
-                  counterMetricFamily.addMetric(tagValues, value);
-                  metricFamilySamples.add(counterMetricFamily);
+
+                  if (prometheusFotmattingMetrics.containsKey(metricNamePrometheus)) {
+                    // already registered once
+                    // find
+                    // add new tags & values
+                    CounterMetricFamily counterMetricFamily = (CounterMetricFamily) prometheusFotmattingMetrics.get(metricNamePrometheus);
+                    counterMetricFamily.addMetric(tagValues, value);
+                  } else {
+                    // never registered
+                    CounterMetricFamily counterMetricFamily = new CounterMetricFamily(metricNamePrometheus, kafkaMetric.metricName().description(), tagsKeys);
+                    counterMetricFamily.addMetric(tagValues, value);
+                    prometheusFotmattingMetrics.put(metricNamePrometheus, counterMetricFamily);
+                  }
+
                 } else {
                   // not counter
                 }
@@ -52,20 +63,33 @@ public abstract class KafkaMetrics {
                 double value;
                 if (kafkaMetric.metricValue() instanceof Double) {
                   value = (double) kafkaMetric.metricValue();
-                  SummaryMetricFamily summaryMetricFamily =
-                          new SummaryMetricFamily(metricName(kafkaMetric), kafkaMetric.metricName().description(), tagsKeys);
-                  summaryMetricFamily.addMetric(tagValues, value, value);
-                  metricFamilySamples.add(summaryMetricFamily);
+
+                  if (prometheusFotmattingMetrics.containsKey(metricNamePrometheus)) {
+                    SummaryMetricFamily summaryMetricFamily = (SummaryMetricFamily) prometheusFotmattingMetrics.get(metricNamePrometheus);
+                    summaryMetricFamily.addMetric(tagValues, value, value);
+                  } else {
+                    SummaryMetricFamily summaryMetricFamily =
+                            new SummaryMetricFamily(metricNamePrometheus, kafkaMetric.metricName().description(), tagsKeys);
+                    summaryMetricFamily.addMetric(tagValues, value, value);
+                    prometheusFotmattingMetrics.put(metricNamePrometheus, summaryMetricFamily);
+                  }
+                } else {
+                  // not a summary
                 }
               } else {
                 double value;
                 if (metric.metricValue() instanceof Double) {
                   value = (double) metric.metricValue();
-                  GaugeMetricFamily gaugeMetricFamily =
-                          new GaugeMetricFamily(
-                                  metricName(kafkaMetric), kafkaMetric.metricName().description(), tagsKeys);
-                  gaugeMetricFamily.addMetric(tagValues, value);
-                  metricFamilySamples.add(gaugeMetricFamily);
+
+                  if (prometheusFotmattingMetrics.containsKey(metricNamePrometheus)) {
+                    GaugeMetricFamily gaugeMetricFamily = (GaugeMetricFamily) prometheusFotmattingMetrics.get(metricNamePrometheus);
+                    gaugeMetricFamily.addMetric(tagValues, value);
+                  } else {
+                    GaugeMetricFamily gaugeMetricFamily =
+                            new GaugeMetricFamily(metricNamePrometheus, kafkaMetric.metricName().description(), tagsKeys);
+                    gaugeMetricFamily.addMetric(tagValues, value);
+                    prometheusFotmattingMetrics.put(metricNamePrometheus, gaugeMetricFamily);
+                  }
                 } else {
                   // not a gauge
                 }
@@ -73,7 +97,8 @@ public abstract class KafkaMetrics {
             }
           }
         });
-    return metricFamilySamples;
+
+    return new ArrayList<>(prometheusFotmattingMetrics.values());
   }
 
   private String metricName(KafkaMetric metric) {
@@ -93,7 +118,6 @@ public abstract class KafkaMetrics {
     }
     // append fail https://github.com/sysco-middleware/kafka-client-collector/issues/12
     // kafka node metrics repeats same set twice for `node-id="node-1"` and `node-id="node--1"`
-    // todo: investigate
     if (kafkaMetric.metricName().tags().values().stream().anyMatch((tagValue -> tagValue.contains("--")))) {
       return false;
     }
