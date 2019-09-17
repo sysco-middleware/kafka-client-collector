@@ -4,7 +4,7 @@
 
     <groupId>no.sysco.middleware.prometheus</groupId>
     <artifactId>kafka-client-collector</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
 
     <name>kafka-client-collector</name>
     <description>Custom Kafka client JMX collector for prometheus</description>
@@ -212,7 +212,7 @@
         <developerConnection>scm:git:ssh://git@github.com/sysco-middleware/kafka-client-collector.git
         </developerConnection>
         <url>http://github.com/sysco-middleware/kafka-client-collector/tree/master</url>
-        <tag>HEAD</tag>
+        <tag>v0.0.5</tag>
     </scm>
 
     <issueManagement>
