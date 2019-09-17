@@ -9,12 +9,13 @@ for collecting JMX metrics from kafka clients.
 |:-------------:|:-------------:|:-----:|
 | 0.0.3      | 2.1.1 | 0.6.0 |
 | 0.0.4      | 2.3.0 | 0.6.0 |
+| 0.0.5      | 2.3.0 | 0.6.0 |
 ## Usage 
 ```xml
 <dependency>
     <groupId>no.sysco.middleware.prometheus</groupId>
     <artifactId>kafka-client-collector</artifactId>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
 </dependency>
 ```
 

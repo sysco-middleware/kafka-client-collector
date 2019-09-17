@@ -111,4 +111,5 @@ Refs:
 
 # 09.08.2019
 Add opportunity to use different http servers
- 
+# 17.09.2019
+Release 0.0.5 -> fix metric registered twice 
